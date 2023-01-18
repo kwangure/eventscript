@@ -11,11 +11,7 @@ export class ESNode {
 	 * @param {T} value
 	 */
 	constructor(value) {
-		try {
-			this.#value = structuredClone(value);
-		} catch (e) {
-			throw TypeError('ESNodes must be values that are serializable using the structured clone algorithm.');
-		}
+		this.#value = value;
 	}
 	#callSubscribers() {
 		for (const suscriber of this.#subscribers) {
@@ -48,7 +44,7 @@ export class ESNode {
 		return () => this.#subscribers.delete(fn);
 	}
 	valueOf() {
-		return structuredClone(this.#value);
+		return this.#value;
 	}
 	toJSON() {
 		return this.valueOf();

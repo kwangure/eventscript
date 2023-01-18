@@ -10,16 +10,6 @@ describe('ESNode', () => {
 		expect(node2.valueOf()).toBe(3);
 	});
 
-	it('rejects unclonable values', () => {
-		expect(() =>  new ESNode(Symbol('test'))).toThrowError(/serializable/);
-	});
-
-	it('does not reference original value', () => {
-		const value = { three: 3 };
-		const node3 = new ESNode(value);
-		expect(node3.valueOf()).not.toBe(value);
-	});
-
 	it('set number using dispatch', () => {
 		const node = new ESNode('3');
 		expect(node.valueOf()).toBe('3');
