@@ -17,7 +17,10 @@ export class ESNumber extends ESNode {
 	dispatchEvent(event, value) {
 		super.dispatchEvent(event, Number(value))
 	}
+	toJSON() {
+		return super.get();
+	}
  	[Symbol.toPrimitive]() {
-		return this.valueOf();
+		return super.get();
 	}
 }

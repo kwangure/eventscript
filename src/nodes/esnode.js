@@ -28,6 +28,9 @@ export class ESNode {
 			this.#callSubscribers();
 		}
 	}
+	get() {
+		return this.#value;
+	}
 	/**
 	 * @param {T} value
 	 */
@@ -42,11 +45,5 @@ export class ESNode {
 		this.#subscribers.add(fn);
 		fn(this.#value);
 		return () => this.#subscribers.delete(fn);
-	}
-	valueOf() {
-		return this.#value;
-	}
-	toJSON() {
-		return this.valueOf();
 	}
 }

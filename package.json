@@ -9,6 +9,9 @@
   "author": "Kafungo Wangure",
   "license": "MIT",
   "type": "module",
+  "dependencies": {
+    "type-fest": "^3.5.2"
+  },
   "devDependencies": {
     "vitest": "^0.27.2"
   }
