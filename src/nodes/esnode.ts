@@ -1,16 +1,10 @@
+import type { JsonValue } from "type-fest";
 import { isESNodeType } from "./esnodeutils";
 
-/**
- * @template T
- */
-export class ESNode {
-	/** @type {Set<(arg0: T) => any>} */
-	#subscribers = new Set();
+export abstract class ESNode<T> {
+	#subscribers: Set<(arg: T) => any> = new Set();
 	#value;
-	/**
-	 * @param {T} value
-	 */
-	constructor(value) {
+	constructor(value: T) {
 		this.#value = value;
 	}
 	#callSubscribers() {
@@ -18,11 +12,7 @@ export class ESNode {
 			return suscriber(this.#value);
 		}
 	}
-	/**
-	 * @param {string} event
-	 * @param {T} value
-	 */
-	dispatchEvent(event, value) {
+	dispatchEvent(event: string, value: T): any {
 		if (event === 'set') {
 			this.#value = value;
 			this.#callSubscribers();
@@ -31,19 +21,14 @@ export class ESNode {
 	get() {
 		return this.#value;
 	}
-	/**
-	 * @param {T} value
-	 */
-	set(value) {
+	set(value: T) {
 		if (!isESNodeType(this, ESNode)) return;
 		this.dispatchEvent('set', value);
 	}
-	/**
-	 * @param {(arg0: T) => any} fn
-	 */
-	subscribe(fn) {
+	subscribe(fn: (arg: T) => any) {
 		this.#subscribers.add(fn);
 		fn(this.#value);
 		return () => this.#subscribers.delete(fn);
 	}
+	abstract toJSON() : JsonValue;
 }

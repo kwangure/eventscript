@@ -5,6 +5,7 @@ import { ESNumber } from './esnumber';
 
 describe('isESNodeType', () => {
 	it('returns true for exact ESNode classes', () => {
+		// @ts-expect-error
 		const test = new ESNode('5');
 		expect(isESNodeType(test, ESNode)).toBe(true);
 
@@ -13,6 +14,7 @@ describe('isESNodeType', () => {
 	});
 
 	it('returns false for inherited ESNode classes', () => {
+		// @ts-expect-error
 		const test = new ESNode('5');
 		expect(isESNodeType(test, ESNumber)).toBe(false);
 
@@ -23,6 +25,7 @@ describe('isESNodeType', () => {
 
 describe('isESNode', () => {
 	it('returns true for ESNodes', () => {
+		// @ts-expect-error
 		expect(isESNode(new ESNode('5'))).toBe(true);
 		expect(isESNode(new ESNumber('5'))).toBe(true);
 	});
