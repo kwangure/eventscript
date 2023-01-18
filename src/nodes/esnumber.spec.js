@@ -15,4 +15,8 @@ describe('ESNumber', () => {
 		const number = new ESNumber('5');
 		expect(JSON.stringify(number)).toEqual('5');
 	});
+
+	it.todo('ignores aliases when dispatch is overwritten', () => {
+
+	});
 });
