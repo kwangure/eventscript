@@ -1,3 +1,5 @@
+import { isESNodeType } from "./esnodeutils";
+
 /**
  * @template T
  */
@@ -29,6 +31,13 @@ export class ESNode {
 			this.#value = value;
 			this.#callSubscribers();
 		}
+	}
+	/**
+	 * @param {T} value
+	 */
+	set(value) {
+		if (!isESNodeType(this, ESNode)) return;
+		this.dispatchEvent('set', value);
 	}
 	/**
 	 * @param {(arg0: T) => any} fn
