@@ -107,5 +107,10 @@ describe('ESNode', () => {
 			expect(parentValues).toBe('444');
 		});
 
+		it('ignores bogus removes', () => {
+			parentNode.remove(child1, child2, child3);
+			expect(childValues).toBe('123123123');
+			expect(parentValues).toBe('444');
+		});
 	});
 });
