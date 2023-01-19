@@ -113,4 +113,32 @@ describe('ESNode', () => {
 			expect(parentValues).toBe('444');
 		});
 	});
+
+	it('bubbles changes to parents', () => {
+		const grandparent = new ESNewNode('1');
+		const parent = new ESNewNode('2');
+		const child = new ESNewNode('3');
+
+		let grandvalue = '';
+		let parentvalue = '';
+		let childvalue = '';
+		grandparent.subscribe((value) => grandvalue += value)
+		parent.subscribe((value) => parentvalue += value)
+		child.subscribe((value) => childvalue += value)
+
+		grandparent.append(parent);
+		parent.append(child);
+
+		expect(grandvalue).toBe('111');
+		expect(parentvalue).toBe('222');
+		expect(childvalue).toBe('33');
+		child.set('4');
+		expect(grandvalue).toBe('1111');
+		expect(parentvalue).toBe('2222');
+		expect(childvalue).toBe('334');
+	});
+
+	it.todo('removes child from old parent before appending to new parent', () => {
+
+	});
 });

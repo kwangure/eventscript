@@ -1,6 +1,6 @@
 import type { JsonValue } from "type-fest";
-import { isESNodeType } from "./esnodeutils";
 
+const _CALL_SUBSCRIBERS = Symbol('call-subscribers');
 const _SET_PARENT = Symbol('set-parent');
 
 export abstract class ESNode<T> {
@@ -11,7 +11,16 @@ export abstract class ESNode<T> {
 	constructor(value: T) {
 		this.#value = value;
 	}
-	#callSubscribers() {
+	#bubbleChange() {
+		/** @type {ESNode<any> | null} */
+		let current;
+		current = this;
+		while (current !== null) {
+			current[_CALL_SUBSCRIBERS]();
+			current = current.parentNode;
+		}
+	}
+	[_CALL_SUBSCRIBERS]() {
 		for (const suscriber of this.#subscribers) {
 			return suscriber(this.#value);
 		}
@@ -22,7 +31,7 @@ export abstract class ESNode<T> {
 	dispatchEvent(event: string, value: T): any {
 		if (event === 'set') {
 			this.#value = value;
-			this.#callSubscribers();
+			this.#bubbleChange();
 		}
 	}
 	get() {
@@ -49,23 +58,32 @@ export abstract class ESNode<T> {
 			this.#children.add(node);
 		}
 
-		this.#callSubscribers();
+		// Call node subscribers after sibling nodes have been updated
+		for (const node of nodes) {
+			node[_CALL_SUBSCRIBERS]();
+		}
+
+		this.#bubbleChange();
 	}
 	remove(...nodes: ESNode<any>[]): void {
 		if (!nodes.length) return;
 
-		let deleted = 0;
+		const deleted = [];
 		for (const node of nodes) {
 			if (this.#children.delete(node)) {
 				node[_SET_PARENT](null);
-				deleted += 1
+				deleted.push(node);
 			}
 		}
 
-		if (deleted) this.#callSubscribers();
+		if (deleted.length) {
+			for (const node of deleted) {
+				node[_CALL_SUBSCRIBERS]();
+			}
+			this.#bubbleChange();
+		}
 	}
 	[_SET_PARENT](node: ESNode<any> | null): void {
 		this.#parentNode = node;
-		this.#callSubscribers();
 	}
 }
