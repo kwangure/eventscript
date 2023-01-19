@@ -6,9 +6,8 @@ describe('ESNumber', () => {
 		const number = new ESNumber('3');
 		expect(number.get()).toBe(3);
 
-		// @ts-expect-error
 		// `&` does type coercion
-		expect(number & 1).toBe(1);
+		expect(/** @type {any} */(number) & 1).toBe(1);
 	});
 
 	it('is coercable to string', () => {

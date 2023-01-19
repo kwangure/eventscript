@@ -17,18 +17,15 @@ class ESNewNode extends ESNode {
 
 describe('ESNode', () => {
 	it('returns untransformed values', () => {
-		// @ts-expect-error
-		const node = new ESNode('3');
+		const node = new ESNewNode('3');
 		expect(node.get()).toBe('3');
 
-		// @ts-expect-error
-		const node2 = new ESNode(3);
+		const node2 = new ESNewNode(3);
 		expect(node2.get()).toBe(3);
 	});
 
 	it('set number using dispatch', () => {
-		// @ts-expect-error
-		const node = new ESNode('3');
+		const node = new ESNewNode('3');
 		expect(node.get()).toBe('3');
 
 		node.dispatchEvent('set', '4');
@@ -36,8 +33,7 @@ describe('ESNode', () => {
 	});
 
 	it('set number using alias', () => {
-		// @ts-expect-error
-		const node = new ESNode('3');
+		const node = new ESNewNode('3');
 		expect(node.get()).toBe('3');
 
 		node.set('4');
