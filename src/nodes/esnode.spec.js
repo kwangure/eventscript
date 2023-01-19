@@ -32,20 +32,18 @@ describe('ESNode', () => {
 		expect(node.get()).toBe('4');
 	});
 
-	it('set number using alias', () => {
+	it('ignores aliases when dispatch is overwritten', () => {
 		const node = new ESNewNode('3');
 		expect(node.get()).toBe('3');
 
 		node.set('4');
 		expect(node.get()).toBe('4');
-	});
 
-	it('ignores aliases when dispatch is overwritten', () => {
 		/**
 		 * @template T
 		 * @extends {ESNode<T>}
 		 */
-		class ESNewNode extends ESNode {
+		class ESNewNode2 extends ESNode {
 			/**
 			 * @param {string} event
 			 * @param {T} value
@@ -60,9 +58,9 @@ describe('ESNode', () => {
 			}
 		}
 
-		const node = new ESNewNode('3');
-		node.set('4');
-		expect(node.get()).toBe('3');
+		const node2 = new ESNewNode2('3');
+		node2.set('4');
+		expect(node2.get()).toBe('3');
 	});
 
 	it.todo('calls subsbribers', () => {

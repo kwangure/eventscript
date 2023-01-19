@@ -32,7 +32,7 @@ export abstract class ESNode<T> {
 		return this.#parentNode;
 	}
 	set(value: T) {
-		if (!isESNodeType(this, ESNode)) return;
+		if (this.dispatchEvent !== ESNode.prototype.dispatchEvent) return;
 		this.dispatchEvent('set', value);
 	}
 	subscribe(fn: (arg: T) => any) {
