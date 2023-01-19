@@ -15,7 +15,11 @@ export class ESNumber extends ESNode {
 	 * @param {any} value
 	 */
 	dispatchEvent(event, value) {
-		super.dispatchEvent(event, Number(value))
+		const number = Number(value);
+		if (event === 'set') {
+			if (super.get() === number) return;
+			super.dispatchEvent(event, number);
+		}
 	}
 	toJSON() {
 		return super.get();

@@ -28,6 +28,16 @@ describe('ESNumber', () => {
 		expect(number1).not.toBe(number1Also);
 	});
 
+	it('does not call subscribers on dispatchEvent unless value changed', () => {
+		const number1 = new ESNumber('1');
+		let number1value = 0;
+		number1.subscribe((value) => number1value += value);
+		expect(number1value).toBe(1);
+
+		number1.dispatchEvent('set', 1);
+		expect(number1value).toBe(1);
+	});
+
 	it.todo('ignores aliases when dispatch is overwritten', () => {
 
 	});
