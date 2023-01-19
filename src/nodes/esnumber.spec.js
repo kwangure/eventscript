@@ -21,6 +21,14 @@ describe('ESNumber', () => {
 		expect(JSON.stringify(number)).toEqual('5');
 	});
 
+	it('creates new ESNumber from exisiting ESNumbers', () => {
+		const number1 = new ESNumber('1');
+		const number1Also = new ESNumber(number1);
+		expect(number1Also.get()).toBe(1);
+		expect(number1).toEqual(number1Also);
+		expect(number1).not.toBe(number1Also);
+	});
+
 	it.todo('ignores aliases when dispatch is overwritten', () => {
 
 	});

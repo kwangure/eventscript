@@ -1,4 +1,4 @@
-import { ESNode } from "./esnode.js";
+import { ESNode } from "./esnode";
 
 /**
  * @extends {ESNode<number>}
