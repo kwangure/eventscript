@@ -27,8 +27,9 @@ export abstract class ESNode<T> {
 	get children() {
 		return [...this.#children];
 	}
-	set(value: T): any {
-		this.#value = value;
+	// Use broad type to ease class subtyping
+	set(...values: any[]): any {
+		this.#value = values[0] as T;
 	}
 	get() {
 		return this.#value;
