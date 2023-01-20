@@ -10,6 +10,13 @@ import { ESNode } from './esnode';
  * @extends {ESNode<T>}
  */
 class ESNewNode extends ESNode {
+	/**
+	 * @param {any} value
+	 */
+	set(value) {
+		super.set(value);
+		super.callSubscribers();
+	}
 	toJSON() {
 		return /** @type {JsonValue} */(super.get());
 	}
@@ -32,8 +39,41 @@ describe('ESNode', () => {
 		expect(node.get()).toBe('4');
 	});
 
-	it.todo('calls subsbribers', () => {
+	it('calls subsbribers', () => {
+		const node = new ESNewNode('3');
 
+		let value1;
+		const unsubscribe1 = node.subscribe((value) => value1 = value);
+		let value2;
+		const unsubscribe2 = node.subscribe((value) => value2 = value);
+		let value3;
+		const unsubscribe3 = node.subscribe((value) => value3 = value);
+		expect(value1).toBe('3');
+		expect(value2).toBe('3');
+		expect(value3).toBe('3');
+
+		node.set(4);
+		expect(value1).toBe(4);
+		expect(value2).toBe(4);
+		expect(value3).toBe(4);
+
+		unsubscribe3();
+		node.set(null);
+		expect(value1).toBe(null);
+		expect(value2).toBe(null);
+		expect(value3).toBe(4);
+
+		unsubscribe2();
+		node.set('3');
+		expect(value1).toBe('3');
+		expect(value2).toBe(null);
+		expect(value3).toBe(4);
+
+		unsubscribe1();
+		node.set(100);
+		expect(value1).toBe('3');
+		expect(value2).toBe(null);
+		expect(value3).toBe(4);
 	});
 
 	it.todo('removes child from old parent before appending to new parent', () => {

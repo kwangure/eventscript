@@ -20,8 +20,8 @@ export abstract class ESNode<T> {
 		}
 	}
 	callSubscribers() {
-		for (const suscriber of this.#subscribers) {
-			return suscriber(this.#value);
+		for (const subscriber of this.#subscribers) {
+			subscriber(this.#value);
 		}
 	}
 	get children() {
