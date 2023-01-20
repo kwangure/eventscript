@@ -1,6 +1,5 @@
 import type { JsonValue } from "type-fest";
 
-const _CALL_SUBSCRIBERS = Symbol('call-subscribers');
 const _SET_PARENT = Symbol('set-parent');
 
 export abstract class ESNode<T> {
@@ -11,16 +10,16 @@ export abstract class ESNode<T> {
 	constructor(value: T) {
 		this.#value = value;
 	}
-	#bubbleChange() {
+	bubbleChange() {
 		/** @type {ESNode<any> | null} */
 		let current;
 		current = this;
 		while (current !== null) {
-			current[_CALL_SUBSCRIBERS]();
+			current.callSubscribers();
 			current = current.parentNode;
 		}
 	}
-	[_CALL_SUBSCRIBERS]() {
+	callSubscribers() {
 		for (const suscriber of this.#subscribers) {
 			return suscriber(this.#value);
 		}
@@ -30,7 +29,6 @@ export abstract class ESNode<T> {
 	}
 	set(value: T): any {
 		this.#value = value;
-		this.#bubbleChange();
 	}
 	get() {
 		return this.#value;
@@ -44,24 +42,15 @@ export abstract class ESNode<T> {
 		return () => this.#subscribers.delete(fn);
 	}
 	abstract toJSON() : JsonValue;
-	append(...nodes: ESNode<any>[]): void {
-		if (!nodes.length) return;
-
+	append(...nodes: ESNode<any>[]) {
 		for (const node of nodes) {
 			node[_SET_PARENT](this);
 			this.#children.add(node);
 		}
 
-		// Call node subscribers after sibling nodes have been updated
-		for (const node of nodes) {
-			node[_CALL_SUBSCRIBERS]();
-		}
-
-		this.#bubbleChange();
+		return nodes;
 	}
-	remove(...nodes: ESNode<any>[]): void {
-		if (!nodes.length) return;
-
+	remove(...nodes: ESNode<any>[]) {
 		const deleted = [];
 		for (const node of nodes) {
 			if (this.#children.delete(node)) {
@@ -70,12 +59,7 @@ export abstract class ESNode<T> {
 			}
 		}
 
-		if (deleted.length) {
-			for (const node of deleted) {
-				node[_CALL_SUBSCRIBERS]();
-			}
-			this.#bubbleChange();
-		}
+		return deleted;
 	}
 	[_SET_PARENT](node: ESNode<any> | null): void {
 		this.#parentNode = node;
