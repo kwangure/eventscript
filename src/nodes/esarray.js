@@ -1,37 +1,6 @@
-import { bubbleChange, isESNode } from "./esnodeutils";
+import { ESNaturalNumber, isESNode } from "./esnodeutils";
 import { ESNode } from "./esnode";
 import { NODE_VALUE } from "./esnode_constants";
-
-/**
- * @extends {ESNode<number>}
- */
-export class ESNaturalNumber extends ESNode {
-	/**
-	 * @param {any} value
-	 */
-	constructor(value) {
-		const number = Number(value);
-		super(number);
-		this[NODE_VALUE] = number;
-	}
-	append() { return []; }
-	remove() { return []; }
-	/**
-	 * @param {any} value
-	 */
-	set(value) {
-		const number = Math.max(Number(value), 0);
-		if (this[NODE_VALUE] === number) return;
-		super.set(number);
-		bubbleChange(this);
-	}
-	toJSON() {
-		return this[NODE_VALUE];
-	}
-	[Symbol.toPrimitive]() {
-		return this[NODE_VALUE];
-	}
-}
 
 /**
  * @template T

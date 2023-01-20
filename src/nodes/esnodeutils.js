@@ -39,7 +39,38 @@ export function isESNode(instance) {
 export function isESNodeType(instance, type) {
 	try {
 		return Object.is(instance.constructor, type);
-	} catch(e) {
+	} catch (e) {
 		return false;
+	}
+}
+
+/**
+* @extends {ESNode<number>}
+*/
+export class ESNaturalNumber extends ESNode {
+	/**
+	 * @param {any} value
+	 */
+	constructor(value) {
+		const number = Number(value);
+		super(number);
+		this[NODE_VALUE] = number;
+	}
+	append() { return []; }
+	remove() { return []; }
+	/**
+	 * @param {any} value
+	 */
+	set(value) {
+		const number = Math.max(Number(value), 0);
+		if (this[NODE_VALUE] === number) return;
+		super.set(number);
+		bubbleChange(this);
+	}
+	toJSON() {
+		return this[NODE_VALUE];
+	}
+	[Symbol.toPrimitive]() {
+		return this[NODE_VALUE];
 	}
 }
