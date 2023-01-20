@@ -1,4 +1,5 @@
 import { ESNode } from "./esnode";
+import { NODE_VALUE } from "./esnode_constants";
 
 /**
  * @extends {ESNode<number>}
@@ -8,7 +9,9 @@ export class ESNumber extends ESNode {
 	 * @param {any} value
 	 */
 	constructor(value) {
-		super(Number(value));
+		const number = Number(value);
+		super(number);
+		this[NODE_VALUE] = number;
 	}
 	/**
 	 * @param {ESNumber[]} nodes
@@ -39,14 +42,14 @@ export class ESNumber extends ESNode {
 	 */
 	set(value) {
 		const number = Number(value);
-		if (super.get() === number) return;
+		if (this[NODE_VALUE] === number) return;
 		super.set(number);
 		super.bubbleChange();
 	}
 	toJSON() {
-		return super.get();
+		return this[NODE_VALUE];
 	}
- 	[Symbol.toPrimitive]() {
-		return super.get();
+	[Symbol.toPrimitive]() {
+		return this[NODE_VALUE];
 	}
 }

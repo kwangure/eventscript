@@ -1,5 +1,6 @@
 import { ESNode } from "./esnode";
 import { isESNode } from "./esnodeutils";
+import { NODE_VALUE } from "./esnode_constants";
 
 /**
  * @extends {ESNode<number>}
@@ -9,25 +10,27 @@ export class ESNaturalNumber extends ESNode {
 	 * @param {any} value
 	 */
 	constructor(value) {
-		super(Number(value));
+		const number = Number(value);
+		super(number);
+		this[NODE_VALUE] = number;
 	}
 	append() { return []; }
-	bubbleChange() {}
+	bubbleChange() { }
 	remove() { return []; }
 	/**
 	 * @param {any} value
 	 */
 	set(value) {
 		const number = Math.max(Number(value), 0);
-		if (super.get() === number) return;
+		if (this[NODE_VALUE] === number) return;
 		super.set(number);
 		super.bubbleChange();
 	}
 	toJSON() {
-		return super.get();
+		return this[NODE_VALUE];
 	}
- 	[Symbol.toPrimitive]() {
-		return super.get();
+	[Symbol.toPrimitive]() {
+		return this[NODE_VALUE];
 	}
 }
 
@@ -43,9 +46,10 @@ export class ESArray extends ESNode {
 	constructor(values = []) {
 		super(values);
 
+		this[NODE_VALUE] = values;
 		this.#length.set(values.length);
 		this.#length.subscribe((value) => {
-			const array = super.get();
+			const array = this[NODE_VALUE];
 			if (array.length === value) return;
 			array.length = value;
 		});
@@ -55,13 +59,13 @@ export class ESArray extends ESNode {
 	 * @param {number} index
 	 */
 	at(index) {
-		const array = super.get();
+		const array = this[NODE_VALUE];
 		const value = array.at(index);
 		super.set(array);
 		return value;
 	}
 	get() {
-		return [...super.get()];
+		return [...this[NODE_VALUE]];
 	}
 	get length() {
 		return this.#length;
@@ -70,7 +74,7 @@ export class ESArray extends ESNode {
 	 * @param {ESNode<any>[]} values
 	 */
 	push(...values) {
-		const array = super.get();
+		const array = this[NODE_VALUE];
 		array.push(...values);
 
 		super.append(...values);
@@ -80,18 +84,17 @@ export class ESArray extends ESNode {
 	 * @returns {ESNode<any> | undefined}
 	 */
 	pop() {
-		const array = super.get();
-		if (array.length === 0) return;
+		if (this[NODE_VALUE].length === 0) return;
 
-		const value = array.pop();
+		const value = this[NODE_VALUE].pop();
 		// `value` could be undefined if array was grown using `array.length`
 		if (isESNode(value)) {
 			super.remove(value);
 		}
-		this.#length.set(array.length);
+		this.#length.set(this[NODE_VALUE].length);
 		return value;
 	}
 	toJSON() {
-		return super.get().map((esnode) => esnode.toJSON());
+		return this[NODE_VALUE].map((esnode) => esnode.toJSON());
 	}
 }

@@ -1,4 +1,5 @@
 import type { JsonValue } from "type-fest";
+import { NODE_VALUE } from "./esnode_constants";
 
 const _SET_PARENT = Symbol('set-parent');
 
@@ -6,9 +7,11 @@ export abstract class ESNode<T> {
 	#children: Set<ESNode<any>> = new Set();
 	#parentNode: ESNode<any> | null = null;
 	#subscribers: Set<(arg: T) => any> = new Set();
-	#value;
+
+	[NODE_VALUE]: T;
+
 	constructor(value: T) {
-		this.#value = value;
+		this[NODE_VALUE] = value;
 	}
 	bubbleChange() {
 		/** @type {ESNode<any> | null} */
@@ -21,7 +24,7 @@ export abstract class ESNode<T> {
 	}
 	callSubscribers() {
 		for (const subscriber of this.#subscribers) {
-			subscriber(this.#value);
+			subscriber(this[NODE_VALUE]);
 		}
 	}
 	get children() {
@@ -29,20 +32,20 @@ export abstract class ESNode<T> {
 	}
 	// Use broad type to ease class subtyping
 	set(...values: any[]): any {
-		this.#value = values[0] as T;
+		this[NODE_VALUE] = values[0] as T;
 	}
 	get() {
-		return this.#value;
+		return this[NODE_VALUE];
 	}
 	get parentNode() {
 		return this.#parentNode;
 	}
 	subscribe(fn: (arg: T) => any) {
 		this.#subscribers.add(fn);
-		fn(this.#value);
+		fn(this[NODE_VALUE]);
 		return () => this.#subscribers.delete(fn);
 	}
-	abstract toJSON() : JsonValue;
+	abstract toJSON(): JsonValue;
 	append(...nodes: ESNode<any>[]) {
 		for (const node of nodes) {
 			node[_SET_PARENT](this);
