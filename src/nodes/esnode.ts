@@ -28,21 +28,15 @@ export abstract class ESNode<T> {
 	get children() {
 		return [...this.#children];
 	}
-	dispatchEvent(event: string, value: T): any {
-		if (event === 'set') {
-			this.#value = value;
-			this.#bubbleChange();
-		}
+	set(value: T): any {
+		this.#value = value;
+		this.#bubbleChange();
 	}
 	get() {
 		return this.#value;
 	}
 	get parentNode() {
 		return this.#parentNode;
-	}
-	set(value: T) {
-		if (this.dispatchEvent !== ESNode.prototype.dispatchEvent) return;
-		this.dispatchEvent('set', value);
 	}
 	subscribe(fn: (arg: T) => any) {
 		this.#subscribers.add(fn);

@@ -24,43 +24,12 @@ describe('ESNode', () => {
 		expect(node2.get()).toBe(3);
 	});
 
-	it('set number using dispatch', () => {
-		const node = new ESNewNode('3');
-		expect(node.get()).toBe('3');
-
-		node.dispatchEvent('set', '4');
-		expect(node.get()).toBe('4');
-	});
-
-	it('ignores aliases when dispatch is overwritten', () => {
+	it('sets number', () => {
 		const node = new ESNewNode('3');
 		expect(node.get()).toBe('3');
 
 		node.set('4');
 		expect(node.get()).toBe('4');
-
-		/**
-		 * @template T
-		 * @extends {ESNode<T>}
-		 */
-		class ESNewNode2 extends ESNode {
-			/**
-			 * @param {string} event
-			 * @param {T} value
-			 */
-			dispatchEvent(event, value) {
-				if (event === 'set') {
-					super.dispatchEvent(event, value);
-				}
-			}
-			toJSON() {
-				return /** @type {JsonValue} */(super.get())
-			}
-		}
-
-		const node2 = new ESNewNode2('3');
-		node2.set('4');
-		expect(node2.get()).toBe('3');
 	});
 
 	it.todo('calls subsbribers', () => {

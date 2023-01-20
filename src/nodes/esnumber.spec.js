@@ -34,7 +34,7 @@ describe('ESNumber', () => {
 		number1.subscribe((value) => number1value += value);
 		expect(number1value).toBe(1);
 
-		number1.dispatchEvent('set', 1);
+		number1.set(1);
 		expect(number1value).toBe(1);
 	});
 
