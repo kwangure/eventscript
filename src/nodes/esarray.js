@@ -63,9 +63,6 @@ export class ESArray extends ESNode {
 		super.set(array);
 		return value;
 	}
-	get() {
-		return [...this[NODE_VALUE]];
-	}
 	get length() {
 		return this.#length;
 	}

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, test } from 'vitest';
 import { ESArray } from './esarray.js';
+import { NODE_VALUE } from './esnode_constants.js';
 import { ESNumber } from './esnumber.js';
 
 describe('ESArray', () => {
@@ -18,7 +19,7 @@ describe('ESArray', () => {
 	});
 
 	it('accepts values', () => {
-		const got = array.get();
+		const got = array[NODE_VALUE];
 		for (let i = 0; i < got.length; i++) {
 			const child = got[i];
 			expect(child.parentNode).toBe(array);
@@ -33,34 +34,26 @@ describe('ESArray', () => {
 		expect(array.at(-1)).toBe(values[2]);
 	});
 
-	test('get', () => {
-		const got1 = array.get();
-		const got2 = array.get();
-
-		expect(got1).not.toBe(got2);
-		expect(got1).toEqual(got2);
-	});
-
 	test('push', () => {
-		const length1 = array.get().length;
+		const length1 = array[NODE_VALUE].length;
 		expect(length1).toBe(3);
 
 		const value = new ESNumber(42);
 		array.push(value);
-		const length2 = array.get().length;
+		const length2 = array[NODE_VALUE].length;
 		expect(length2).toBe(4);
 		expect(array.at(3)).toBe(value);
 	});
 
 	test('pop', () => {
-		const length1 = array.get().length;
+		const length1 = array[NODE_VALUE].length;
 		expect(length1).toBe(3);
 
 		const last = array.at(-1);
 		const popped = array.pop();
 		expect(popped).toBe(last);
 
-		const length2 = array.get().length;
+		const length2 = array[NODE_VALUE].length;
 		expect(length2).toBe(2);
 	});
 
@@ -70,31 +63,31 @@ describe('ESArray', () => {
 		});
 
 		it('increments on push', () => {
-			expect(array.length.get()).toBe(3);
+			expect(array.length[NODE_VALUE]).toBe(3);
 
 			array.push(new ESNumber(42));
-			expect(array.length.get()).toBe(4);
+			expect(array.length[NODE_VALUE]).toBe(4);
 			array.push(new ESNumber(69));
-			expect(array.length.get()).toBe(5);
+			expect(array.length[NODE_VALUE]).toBe(5);
 		});
 
 		it('decrements on pop', () => {
-			expect(array.length.get()).toBe(3);
+			expect(array.length[NODE_VALUE]).toBe(3);
 
 			array.pop();
-			expect(array.length.get()).toBe(2);
+			expect(array.length[NODE_VALUE]).toBe(2);
 			array.pop();
-			expect(array.length.get()).toBe(1);
+			expect(array.length[NODE_VALUE]).toBe(1);
 		});
 
 		it('grows array when set', () => {
 			array.length.set(10);
-			expect(array.get().length).toBe(10);
+			expect(array[NODE_VALUE].length).toBe(10);
 
 			array.pop();
-			expect(array.get().length).toBe(9);
+			expect(array[NODE_VALUE].length).toBe(9);
 			array.push(new ESNumber(42));
-			expect(array.get().length).toBe(10);
+			expect(array[NODE_VALUE].length).toBe(10);
 		});
 
 		it('calls array subscribers when set', () => {

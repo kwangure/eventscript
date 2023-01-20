@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { callSubscribers } from './esnodeutils';
+import { NODE_VALUE } from './esnode_constants';
 import { ESNode } from './esnode';
 
 /**
@@ -16,28 +17,29 @@ class ESNewNode extends ESNode {
 	 */
 	set(value) {
 		super.set(value);
+		this[NODE_VALUE] = value;
 		callSubscribers(this);
 	}
 	toJSON() {
-		return /** @type {JsonValue} */(super.get());
+		return /** @type {JsonValue} */(this[NODE_VALUE]);
 	}
 }
 
 describe('ESNode', () => {
 	it('returns untransformed values', () => {
 		const node = new ESNewNode('3');
-		expect(node.get()).toBe('3');
+		expect(node[NODE_VALUE]).toBe('3');
 
 		const node2 = new ESNewNode(3);
-		expect(node2.get()).toBe(3);
+		expect(node2[NODE_VALUE]).toBe(3);
 	});
 
 	it('sets number', () => {
 		const node = new ESNewNode('3');
-		expect(node.get()).toBe('3');
+		expect(node[NODE_VALUE]).toBe('3');
 
 		node.set('4');
-		expect(node.get()).toBe('4');
+		expect(node[NODE_VALUE]).toBe('4');
 	});
 
 	it('calls subsbribers', () => {

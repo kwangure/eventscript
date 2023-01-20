@@ -20,9 +20,6 @@ export abstract class ESNode<T> {
 	set(...values: any[]): any {
 		this[NODE_VALUE] = values[0] as T;
 	}
-	get() {
-		return this[NODE_VALUE];
-	}
 	get parentNode() {
 		return this.#parentNode;
 	}
