@@ -1,7 +1,7 @@
 <script>
-    import { Index } from "$lib/data";
+    import { Index } from '$lib/data';
 
-	const index = new Index();
+const index = new Index();
 </script>
 
 {$index}

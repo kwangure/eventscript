@@ -1,18 +1,64 @@
 {
-  "name": "eventscript",
-  "version": "0.0.1",
-  "description": "",
-  "scripts": {
-    "test": "vitest run"
-  },
-  "keywords": [],
-  "author": "Kafungo Wangure",
-  "license": "MIT",
-  "type": "module",
-  "dependencies": {
-    "type-fest": "^3.5.2"
-  },
-  "devDependencies": {
-    "vitest": "^0.27.2"
-  }
+    "name": "eventscript",
+    "version": "0.0.1",
+    "description": "",
+    "scripts": {
+        "format": "wireit",
+        "lint": "wireit",
+        "pre-commit": "wireit",
+        "prepare": "husky install",
+        "test": "wireit",
+        "test:playwright": "wireit",
+        "test:vitest": "wireit"
+    },
+    "keywords": [],
+    "author": "Kafungo Wangure",
+    "license": "MIT",
+    "type": "module",
+    "dependencies": {
+        "type-fest": "^3.5.2"
+    },
+    "devDependencies": {
+        "@kwangure/eslint-config-svelte": "^0.2.5",
+        "eslint": "^8.32.0",
+        "eslint-plugin-svelte3": "^4.0.0",
+        "husky": "^8.0.3",
+        "vitest": "^0.27.2",
+        "wireit": "^0.9.3"
+    },
+    "wireit": {
+        "format": {
+            "command": "eslint \"**/*.{js,svelte}\" --color --cache --fix --cache-location .eslintcache",
+            "files": [
+                "\"**/*.{js,svelte,ts}\"",
+                ".eslintignore",
+                ".eslintrc.cjs"
+            ]
+        },
+        "lint": {
+            "command": "eslint \"**/*.{js,svelte}\" --color --cache --cache-location .eslintcache",
+            "files": [
+                "\"**/*.{js,svelte,ts}\"",
+                ".eslintignore",
+                ".eslintrc.cjs"
+            ]
+        },
+        "pre-commit": {
+            "dependencies": [
+                "test",
+                "format"
+            ]
+        },
+        "test": {
+            "dependencies": [
+                "test:vitest"
+            ]
+        },
+        "test:playwright": {
+            "command": "playwright test"
+        },
+        "test:vitest": {
+            "command": "vitest run"
+        }
+    }
 }

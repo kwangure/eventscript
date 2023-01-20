@@ -1,6 +1,7 @@
-import { bubbleChange } from "./esnodeutils";
-import { ESNode } from "./esnode";
-import { NODE_VALUE } from "./esnode_constants";
+import { bubbleChange } from './esnodeutils';
+// eslint-disable-next-line import/no-unresolved
+import { ESNode } from './esnode';
+import { NODE_VALUE } from './esnode_constants';
 
 /**
  * @extends {ESNode<string>}

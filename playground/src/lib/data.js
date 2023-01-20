@@ -1,4 +1,4 @@
-import { ESNumber }  from '$eventscript/nodes/esnumber.js';
+import { ESNumber } from '$eventscript/nodes/esnumber.js';
 
 export class Index extends ESNumber {
 	constructor(value = 0) {

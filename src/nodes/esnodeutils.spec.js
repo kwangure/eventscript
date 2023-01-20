@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { ESNode } from './esnode';
 import { isESNode, isESNodeType } from './esnodeutils';
+// eslint-disable-next-line import/no-unresolved
+import { ESNode } from './esnode';
 import { ESNumber } from './esnumber';
+import { NODE_VALUE } from './esnode_constants';
 
 /**
  * @typedef {import('type-fest').JsonValue} JsonValue
@@ -13,7 +15,7 @@ import { ESNumber } from './esnumber';
  */
 class ESNewNode extends ESNode {
 	toJSON() {
-		return /** @type {JsonValue} */(super.get());
+		return /** @type {JsonValue} */(this[NODE_VALUE]);
 	}
 }
 

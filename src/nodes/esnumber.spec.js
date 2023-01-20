@@ -8,12 +8,13 @@ describe('ESNumber', () => {
 		expect(number[NODE_VALUE]).toBe(3);
 
 		// `&` does type coercion
+		// eslint-disable-next-line no-bitwise
 		expect(/** @type {any} */(number) & 1).toBe(1);
 	});
 
 	it('is coercable to string', () => {
 		const number = new ESNumber('3');
-		expect(number[NODE_VALUE] + 'abc').toBe('3abc');
+		expect(`${number[NODE_VALUE]}abc`).toBe('3abc');
 	});
 
 	it('is serializable to number', () => {

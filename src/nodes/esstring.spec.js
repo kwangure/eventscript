@@ -10,7 +10,7 @@ describe('ESString', () => {
 
 	beforeEach(() => {
 		string = new ESString(3);
-	})
+	});
 
 	it('coerces non-strings to strings', () => {
 		expect(string[NODE_VALUE]).toBe('3');
@@ -20,7 +20,7 @@ describe('ESString', () => {
 	});
 
 	it('is coercable to string', () => {
-		expect(string[NODE_VALUE] + 'abc').toBe('3abc');
+		expect(`${string[NODE_VALUE]}abc`).toBe('3abc');
 	});
 
 	it('is serializable to string', () => {

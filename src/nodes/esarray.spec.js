@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, test } from 'vitest';
 import { ESArray } from './esarray.js';
-import { NODE_VALUE } from './esnode_constants.js';
 import { ESNumber } from './esnumber.js';
+import { NODE_VALUE } from './esnode_constants.js';
 
 describe('ESArray', () => {
 	/**
@@ -103,7 +103,8 @@ describe('ESArray', () => {
 		});
 
 		it('is not called when elements changed, but length did not', () => {
-			const first = /** @type {import('./esnode').ESNode<any>} */(array.at(1));
+			const first
+				= /** @type {import('./esnode').ESNode<any>} */(array.at(1));
 
 			let arrayCallCount = 0;
 			array.subscribe(() => arrayCallCount++);

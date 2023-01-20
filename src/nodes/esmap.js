@@ -1,6 +1,7 @@
-import { NODE_CHILDREN, NODE_VALUE } from "./esnode_constants";
-import { append, ESNaturalNumber, remove } from "./esnodeutils";
-import { ESNode } from "./esnode";
+import { append, ESNaturalNumber, remove } from './esnodeutils';
+import { NODE_CHILDREN, NODE_VALUE } from './esnode_constants';
+// eslint-disable-next-line import/no-unresolved
+import { ESNode } from './esnode';
 
 /**
  * @template {string | number} K
@@ -13,7 +14,7 @@ export class ESMap extends ESNode {
 	 * @param {Iterable<[K, ESNode<any>]>} [values]
 	 */
 	constructor(values = []) {
-		const map = new Map(values)
+		const map = new Map(values);
 		super(map);
 
 		/** @type {Set<ESNode<any>>} */

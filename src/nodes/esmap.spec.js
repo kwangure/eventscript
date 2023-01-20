@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, test } from 'vitest';
 import { ESMap } from './esmap.js';
-import { NODE_VALUE } from './esnode_constants.js';
 import { ESNumber } from './esnumber.js';
+import { NODE_VALUE } from './esnode_constants.js';
 
 describe('ESMap', () => {
 	/** @type {[string | number, ESNumber][]} */
@@ -44,12 +44,12 @@ describe('ESMap', () => {
 	test('toJson', () => {
 		map.set('four-hundred', new ESNumber(400));
 		expect(map.toJSON()).toEqual({
-			1: 1,
-			2: 2,
-			3: 3,
+			'1': 1,
+			'2': 2,
+			'3': 3,
 			'four-hundred': 400,
 		});
-	})
+	});
 
 	describe('size', () => {
 		it('has map as parentNode', () => {

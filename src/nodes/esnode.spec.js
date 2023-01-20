@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { callSubscribers } from './esnodeutils';
-import { NODE_VALUE } from './esnode_constants';
+// eslint-disable-next-line import/no-unresolved
 import { ESNode } from './esnode';
+import { NODE_VALUE } from './esnode_constants';
 
 /**
  * @typedef {import('type-fest').JsonValue} JsonValue

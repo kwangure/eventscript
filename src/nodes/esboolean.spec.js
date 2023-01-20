@@ -10,14 +10,14 @@ describe('ESBoolean', () => {
 
 	beforeEach(() => {
 		boolean = new ESBoolean(3);
-	})
+	});
 
 	it('coerces non-booleans to booleabs', () => {
 		expect(boolean[NODE_VALUE]).toBe(true);
 	});
 
 	it('is coercable to string', () => {
-		expect(boolean[NODE_VALUE] + 'abc').toBe('trueabc');
+		expect(`${boolean[NODE_VALUE]}abc`).toBe('trueabc');
 	});
 
 	it('is serializable to string', () => {

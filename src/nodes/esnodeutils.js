@@ -1,5 +1,6 @@
-import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from "./esnode_constants";
-import { ESNode } from "./esnode";
+import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from './esnode_constants';
+// eslint-disable-next-line import/no-unresolved
+import { ESNode } from './esnode';
 
 /**
  * @param {ESNode<any>} instance
@@ -45,7 +46,7 @@ export function bubbleChange(node) {
 	/** @type {ESNode<any> | null} */
 	let current = node;
 	while (current !== null) {
-		callSubscribers(current)
+		callSubscribers(current);
 		current = current.parentNode;
 	}
 }
@@ -67,7 +68,7 @@ export function isESNode(instance) {
 export function isESNodeType(instance, type) {
 	try {
 		return Object.is(instance.constructor, type);
-	} catch (e) {
+	} catch (error) {
 		return false;
 	}
 }
@@ -84,8 +85,12 @@ export class ESNaturalNumber extends ESNode {
 		super(number);
 		this[NODE_VALUE] = number;
 	}
-	append() { return []; }
-	remove() { return []; }
+	append() {
+		return [];
+	}
+	remove() {
+		return [];
+	}
 	/**
 	 * @param {any} value
 	 */
