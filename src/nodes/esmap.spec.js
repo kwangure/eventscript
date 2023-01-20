@@ -7,7 +7,7 @@ describe('ESMap', () => {
 	/** @type {[string | number, ESNumber][]} */
 	let values;
 	/**
-	 * @type {ESMap<string | number>}
+	 * @type {ESMap<string | number, ESNumber>}
 	 */
 	let map;
 
@@ -34,7 +34,7 @@ describe('ESMap', () => {
 	test('delete', () => {
 		expect(map[NODE_VALUE].size).toBe(3);
 
-		const value = /** @type {import('./esnode').ESNode<any>} */(map.get(1));
+		const value = /** @type {ESNumber} */(map.get(1));
 		expect(value.parentNode).toBe(map);
 		const isDeleted = map.delete(1);
 		expect(isDeleted).toBe(true);
@@ -74,8 +74,21 @@ describe('ESMap', () => {
 			expect(map.size[NODE_VALUE]).toBe(1);
 		});
 
-		it.todo('is not called when elements changed, but size did not', () => {
+		it('is not called when elements changed, but size did not', () => {
+			const first = /** @type {ESNumber} */(map.get(1));
 
+			let mapCallCount = 0;
+			map.subscribe(() => mapCallCount++);
+			let lengthCallCount = 0;
+			map.size.subscribe(() => lengthCallCount++);
+
+
+			first.set(12);
+			first.set(13);
+			first.set(14);
+
+			expect(mapCallCount).toBe(4);
+			expect(lengthCallCount).toBe(1);
 		});
 	});
 });

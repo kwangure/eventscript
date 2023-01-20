@@ -102,6 +102,20 @@ describe('ESArray', () => {
 			expect(arrayLength).toBe(10);
 		});
 
-		it('is not called when elements changed');
+		it('is not called when elements changed, but length did not', () => {
+			const first = /** @type {import('./esnode').ESNode<any>} */(array.at(1));
+
+			let arrayCallCount = 0;
+			array.subscribe(() => arrayCallCount++);
+			let lengthCallCount = 0;
+			array.length.subscribe(() => lengthCallCount++);
+
+			first.set(12);
+			first.set(13);
+			first.set(14);
+
+			expect(arrayCallCount).toBe(4);
+			expect(lengthCallCount).toBe(1);
+		});
 	});
 });
