@@ -118,4 +118,32 @@ describe('ESArray', () => {
 			expect(lengthCallCount).toBe(1);
 		});
 	});
+
+	it('bubbles changes to parents', () => {
+		const number = new ESNumber(1);
+		const child = new ESArray([number]);
+		const parent = new ESArray([child]);
+		const grandparent = new ESArray([parent]);
+
+		let grandparentCallCount = 0;
+		let parentCallCount = 0;
+		let childCallCount = 0;
+		grandparent.subscribe(() => grandparentCallCount += 1);
+		parent.subscribe(() => parentCallCount += 1);
+		child.subscribe(() => childCallCount += 1);
+
+		expect(grandparentCallCount).toBe(1);
+		expect(parentCallCount).toBe(1);
+		expect(childCallCount).toBe(1);
+
+		number.set(3);
+		expect(grandparentCallCount).toBe(2);
+		expect(parentCallCount).toBe(2);
+		expect(childCallCount).toBe(2);
+
+		number.set(0);
+		expect(grandparentCallCount).toBe(3);
+		expect(parentCallCount).toBe(3);
+		expect(childCallCount).toBe(3);
+	});
 });
