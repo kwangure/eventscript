@@ -1,7 +1,9 @@
 import { ESNode } from "./esnode";
 
 /**
- * @param {any} instance
+ * @template T
+ * @param {T} instance
+ * @returns {instance is T & ESNode<any>}
  */
 export function isESNode(instance) {
 	return instance instanceof ESNode;
