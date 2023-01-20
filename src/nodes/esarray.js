@@ -1,6 +1,6 @@
-import { ESNaturalNumber, isESNode } from "./esnodeutils";
+import { append, ESNaturalNumber, isESNode, remove } from "./esnodeutils";
+import { NODE_CHILDREN, NODE_VALUE } from "./esnode_constants";
 import { ESNode } from "./esnode";
-import { NODE_VALUE } from "./esnode_constants";
 
 /**
  * @template T
@@ -15,13 +15,16 @@ export class ESArray extends ESNode {
 		super(values);
 
 		this[NODE_VALUE] = values;
+		/** @type {Set<ESNode<any>>} */
+		this[NODE_CHILDREN] = new Set();
+
 		this.#length.set(values.length);
 		this.#length.subscribe((value) => {
 			const array = this[NODE_VALUE];
 			if (array.length === value) return;
 			array.length = value;
 		});
-		this.append(this.#length, ...values);
+		append(this, this.#length, ...values);
 	}
 	/**
 	 * @param {number} index
@@ -42,7 +45,7 @@ export class ESArray extends ESNode {
 		const array = this[NODE_VALUE];
 		array.push(...values);
 
-		super.append(...values);
+		append(this, ...values);
 		this.#length.set(array.length);
 	}
 	/**
@@ -54,7 +57,7 @@ export class ESArray extends ESNode {
 		const value = this[NODE_VALUE].pop();
 		// `value` could be undefined if array was grown using `array.length`
 		if (isESNode(value)) {
-			super.remove(value);
+			remove(this, value);
 		}
 		this.#length.set(this[NODE_VALUE].length);
 		return value;

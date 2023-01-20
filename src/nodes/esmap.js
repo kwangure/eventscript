@@ -1,6 +1,6 @@
-import { ESNaturalNumber } from "./esnodeutils";
+import { NODE_CHILDREN, NODE_VALUE } from "./esnode_constants";
+import { append, ESNaturalNumber, remove } from "./esnodeutils";
 import { ESNode } from "./esnode";
-import { NODE_VALUE } from "./esnode_constants";
 
 /**
  * @template {string | number} K
@@ -16,6 +16,8 @@ export class ESMap extends ESNode {
 		const map = new Map(values)
 		super(map);
 
+		/** @type {Set<ESNode<any>>} */
+		this[NODE_CHILDREN] = new Set();
 		this[NODE_VALUE] = map;
 		this.#size.set(map.size);
 		this.#size.subscribe((value) => {
@@ -23,7 +25,7 @@ export class ESMap extends ESNode {
 			// TODO: Guard against changing size without calling subscribers
 			this.#size.set(this[NODE_VALUE].size);
 		});
-		this.append(this.#size, ...map.values());
+		append(this, this.#size, ...map.values());
 	}
 	/**
 	 * @param {K} key
@@ -32,7 +34,7 @@ export class ESMap extends ESNode {
 		const value = this[NODE_VALUE].get(key);
 		const isDeleted = this[NODE_VALUE].delete(key);
 		if (isDeleted && value) {
-			super.remove(value);
+			remove(this, value);
 		}
 		this.#size.set(this[NODE_VALUE].size);
 		return isDeleted;
@@ -49,7 +51,7 @@ export class ESMap extends ESNode {
 	 */
 	set(key, value) {
 		this[NODE_VALUE].set(key, value);
-		super.append(value);
+		append(this, value);
 		this.#size.set(this[NODE_VALUE].size);
 		return this;
 	}

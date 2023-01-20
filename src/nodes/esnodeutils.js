@@ -1,6 +1,34 @@
-import { NODE_SUBSCRIBERS, NODE_VALUE } from "./esnode_constants";
+import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from "./esnode_constants";
 import { ESNode } from "./esnode";
 
+/**
+ * @param {ESNode<any>} instance
+ * @param {ESNode<any>[]} nodes
+ */
+export function append(instance, ...nodes) {
+	for (const node of nodes) {
+		node[NODE_PARENT] = instance;
+		instance[NODE_CHILDREN].add(node);
+	}
+
+	return nodes;
+}
+
+/**
+ * @param {ESNode<any>} instance
+ * @param {ESNode<any>[]} nodes
+ */
+export function remove(instance, ...nodes) {
+	const deleted = [];
+	for (const node of nodes) {
+		if (instance[NODE_CHILDREN].delete(node)) {
+			node[NODE_PARENT] = null;
+			deleted.push(node);
+		}
+	}
+
+	return deleted;
+}
 /**
  * @param {ESNode<any>} node
  */
