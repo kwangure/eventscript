@@ -1,3 +1,4 @@
+import { bubbleChange, callSubscribers } from "./esnodeutils";
 import { ESNode } from "./esnode";
 import { NODE_VALUE } from "./esnode_constants";
 
@@ -19,9 +20,9 @@ export class ESNumber extends ESNode {
 	append(...nodes) {
 		const appended = super.append(...nodes);
 		for (const node of appended) {
-			node.callSubscribers();
+			callSubscribers(node);
 		}
-		super.bubbleChange();
+		bubbleChange(this);
 		return nodes;
 	}
 	/**
@@ -31,9 +32,9 @@ export class ESNumber extends ESNode {
 		const deleted = super.remove(...nodes);
 		if (deleted.length) {
 			for (const node of deleted) {
-				node.callSubscribers();
+				callSubscribers(node);
 			}
-			super.bubbleChange();
+			bubbleChange(this);
 		}
 		return deleted;
 	}
@@ -44,7 +45,7 @@ export class ESNumber extends ESNode {
 		const number = Number(value);
 		if (this[NODE_VALUE] === number) return;
 		super.set(number);
-		super.bubbleChange();
+		bubbleChange(this);
 	}
 	toJSON() {
 		return this[NODE_VALUE];

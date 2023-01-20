@@ -1,5 +1,5 @@
+import { bubbleChange, isESNode } from "./esnodeutils";
 import { ESNode } from "./esnode";
-import { isESNode } from "./esnodeutils";
 import { NODE_VALUE } from "./esnode_constants";
 
 /**
@@ -15,7 +15,6 @@ export class ESNaturalNumber extends ESNode {
 		this[NODE_VALUE] = number;
 	}
 	append() { return []; }
-	bubbleChange() { }
 	remove() { return []; }
 	/**
 	 * @param {any} value
@@ -24,7 +23,7 @@ export class ESNaturalNumber extends ESNode {
 		const number = Math.max(Number(value), 0);
 		if (this[NODE_VALUE] === number) return;
 		super.set(number);
-		super.bubbleChange();
+		bubbleChange(this);
 	}
 	toJSON() {
 		return this[NODE_VALUE];

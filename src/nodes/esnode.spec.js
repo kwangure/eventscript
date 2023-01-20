@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { callSubscribers } from './esnodeutils';
 import { ESNode } from './esnode';
 
 /**
@@ -15,7 +16,7 @@ class ESNewNode extends ESNode {
 	 */
 	set(value) {
 		super.set(value);
-		super.callSubscribers();
+		callSubscribers(this);
 	}
 	toJSON() {
 		return /** @type {JsonValue} */(super.get());
