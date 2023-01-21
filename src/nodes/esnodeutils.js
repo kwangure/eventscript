@@ -1,5 +1,5 @@
-import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from './esnode_constants';
-import { ESNode } from './esnode';
+import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from './esnode_constants.js';
+import { ESNode } from './esnode.js';
 
 /**
  * @param {ESNode<any>} instance

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { ESString } from './esstring';
-import { NODE_VALUE } from './esnode_constants';
+import { ESString } from './esstring.js';
+import { NODE_VALUE } from './esnode_constants.js';
 
 describe('ESString', () => {
 	/**

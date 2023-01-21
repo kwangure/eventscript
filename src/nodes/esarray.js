@@ -1,6 +1,6 @@
-import { append, ESNaturalNumber, isESNode, remove } from './esnodeutils';
-import { NODE_CHILDREN, NODE_VALUE } from './esnode_constants';
-import { ESNode } from './esnode';
+import { append, ESNaturalNumber, isESNode, remove } from './esnodeutils.js';
+import { NODE_CHILDREN, NODE_VALUE } from './esnode_constants.js';
+import { ESNode } from './esnode.js';
 
 /**
  * @template T

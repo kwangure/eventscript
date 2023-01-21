@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { callSubscribers } from './esnodeutils';
-import { ESNode } from './esnode';
-import { NODE_VALUE } from './esnode_constants';
+import { callSubscribers } from './esnodeutils.js';
+import { ESNode } from './esnode.js';
+import { NODE_VALUE } from './esnode_constants.js';
 
 /**
  * @typedef {import('type-fest').JsonValue} JsonValue

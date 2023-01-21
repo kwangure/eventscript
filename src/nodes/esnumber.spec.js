@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ESNumber } from 'src/nodes/esnumber.js';
-import { NODE_VALUE } from './esnode_constants';
+import { NODE_VALUE } from './esnode_constants.js';
 
 describe('ESNumber', () => {
 	it('coerces non-numbers to numbers', () => {

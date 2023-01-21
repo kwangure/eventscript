@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { ESBoolean } from './esboolean';
-import { NODE_VALUE } from './esnode_constants';
+import { ESBoolean } from './esboolean.js';
+import { NODE_VALUE } from './esnode_constants.js';
 
 describe('ESBoolean', () => {
 	/**

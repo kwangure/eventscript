@@ -1,6 +1,6 @@
-import { bubbleChange } from './esnodeutils';
-import { ESNode } from './esnode';
-import { NODE_VALUE } from './esnode_constants';
+import { bubbleChange } from './esnodeutils.js';
+import { ESNode } from './esnode.js';
+import { NODE_VALUE } from './esnode_constants.js';
 
 /**
  * @extends {ESNode<boolean>}
