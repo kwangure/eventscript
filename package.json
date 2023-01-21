@@ -5,6 +5,7 @@
     "scripts": {
         "format": "wireit",
         "lint": "wireit",
+        "package": "wireit",
         "pre-commit": "wireit",
         "prepare": "husky install",
         "test": "wireit",
@@ -42,6 +43,9 @@
                 ".eslintignore",
                 ".eslintrc.cjs"
             ]
+        },
+        "package": {
+            "command": "node ./scripts/package/index.js"
         },
         "pre-commit": {
             "dependencies": [
