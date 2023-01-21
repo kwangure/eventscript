@@ -1,6 +1,5 @@
 import { append, ESNaturalNumber, isESNode, remove } from './esnodeutils';
 import { NODE_CHILDREN, NODE_VALUE } from './esnode_constants';
-// eslint-disable-next-line import/no-unresolved
 import { ESNode } from './esnode';
 
 /**

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { isESNode, isESNodeType } from './esnodeutils';
-// eslint-disable-next-line import/no-unresolved
 import { ESNode } from './esnode';
 import { ESNumber } from './esnumber';
 import { NODE_VALUE } from './esnode_constants';

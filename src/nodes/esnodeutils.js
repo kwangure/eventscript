@@ -1,5 +1,4 @@
 import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from './esnode_constants';
-// eslint-disable-next-line import/no-unresolved
 import { ESNode } from './esnode';
 
 /**

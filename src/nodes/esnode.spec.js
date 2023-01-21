@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { callSubscribers } from './esnodeutils';
-// eslint-disable-next-line import/no-unresolved
 import { ESNode } from './esnode';
 import { NODE_VALUE } from './esnode_constants';
 
