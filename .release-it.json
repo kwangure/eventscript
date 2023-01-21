@@ -1,0 +1,14 @@
+{
+    "git": {
+        "commitMessage": "chore(release): v${version}"
+    },
+    "hooks": {
+        "after:bump": [
+            "npm run package"
+        ],
+        "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
+    },
+    "npm": {
+        "publishPath": "./dist"
+    }
+}

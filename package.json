@@ -8,6 +8,7 @@
         "package": "wireit",
         "pre-commit": "wireit",
         "prepare": "husky install",
+        "release": "release-it",
         "test": "wireit",
         "test:playwright": "wireit",
         "test:vitest": "wireit"
@@ -24,6 +25,7 @@
         "eslint": "^8.32.0",
         "eslint-plugin-svelte3": "^4.0.0",
         "husky": "^8.0.3",
+        "release-it": "^15.6.0",
         "vitest": "^0.27.2",
         "wireit": "^0.9.3"
     },
