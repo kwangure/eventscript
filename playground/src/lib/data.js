@@ -4,15 +4,8 @@ export class Index extends ESNumber {
 	constructor(value = 0) {
 		super(value);
 	}
-	/**
-	 * @param {string} event
-	 */
-	dispatchEvent(event) {
-		if (event === 'increment') {
-			super.dispatchEvent('set', super.valueOf() + 1);
-		}
-	}
+	set() {}
 	increment() {
-		super.dispatchEvent('set', super.valueOf() + 1);
+		return super.set(super.toJSON() + 1);
 	}
 }
