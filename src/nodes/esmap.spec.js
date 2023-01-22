@@ -119,4 +119,15 @@ describe('ESMap', () => {
 		expect(parentCallCount).toBe(3);
 		expect(childCallCount).toBe(3);
 	});
+
+	it('is iterable', () => {
+		const nativeMap = new Map(map);
+		expect(nativeMap.has(1)).toBe(true);
+		expect(nativeMap.has(2)).toBe(true);
+		expect(nativeMap.has(3)).toBe(true);
+
+		for (const [key, esnumber] of map) {
+			expect(nativeMap.get(key)).toBe(esnumber);
+		}
+	});
 });

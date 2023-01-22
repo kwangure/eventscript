@@ -66,4 +66,13 @@ export class ESMap extends ESNode {
 		}
 		return json;
 	}
+	[Symbol.iterator]() {
+		return this[NODE_VALUE][Symbol.iterator]();
+	}
+	keys() {
+		return this[NODE_VALUE].keys();
+	}
+	values() {
+		return this[NODE_VALUE].values();
+	}
 }

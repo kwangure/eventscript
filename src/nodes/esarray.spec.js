@@ -147,4 +147,17 @@ describe('ESArray', () => {
 		expect(parentCallCount).toBe(3);
 		expect(childCallCount).toBe(3);
 	});
+
+	it('is iterable', () => {
+		const set = new Set(array);
+		expect(set.has(values[0])).toBe(true);
+		expect(set.has(values[1])).toBe(true);
+		expect(set.has(values[2])).toBe(true);
+
+		let index = 0;
+		for (const esnumber of array) {
+			expect(values[index]).toBe(esnumber);
+			index++;
+		}
+	});
 });

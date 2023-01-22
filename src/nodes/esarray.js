@@ -65,4 +65,7 @@ export class ESArray extends ESNode {
 	toJSON() {
 		return this[NODE_VALUE].map((esnode) => esnode.toJSON());
 	}
+	[Symbol.iterator]() {
+		return this[NODE_VALUE][Symbol.iterator]();
+	}
 }

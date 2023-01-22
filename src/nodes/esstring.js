@@ -29,4 +29,7 @@ export class ESString extends ESNode {
 	[Symbol.toPrimitive]() {
 		return this[NODE_VALUE];
 	}
+	[Symbol.iterator]() {
+		return this[NODE_VALUE][Symbol.iterator]();
+	}
 }
