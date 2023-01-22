@@ -33,3 +33,12 @@ export class ESString extends ESNode {
 		return this[NODE_VALUE][Symbol.iterator]();
 	}
 }
+
+const STRING_METHODS = 'at charAt charCodeAt codePointAt includes endsWith indexOf lastIndexOf localeCompare match matchAll startsWith valueOf'.split(' ');
+
+STRING_METHODS.forEach((method) => {
+	// eslint-disable-next-line func-names
+	ESString.prototype[method] = function (...args) {
+		return String.prototype[method].call(this[NODE_VALUE], ...args);
+	};
+});
