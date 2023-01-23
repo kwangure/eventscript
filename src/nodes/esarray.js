@@ -61,7 +61,16 @@ export class ESArray extends ESNode {
 		return value;
 	}
 	toJSON() {
-		return this[NODE_VALUE].map((esnode) => esnode.toJSON());
+		// JSON.stringify serializes empty slots and undefined in Array to null
+		const array = this[NODE_VALUE];
+		const json = Array(array.length).fill(null);
+		// TODO: Should we do input validation in setters so that we can assume ESNodes here
+		// or should we rely on TypeScript. Validation probably.
+		// Foreach skips empty slots.
+		array.forEach((item, index) => {
+			json[index] = item.toJSON();
+		});
+		return json;
 	}
 	[Symbol.iterator]() {
 		return this[NODE_VALUE][Symbol.iterator]();

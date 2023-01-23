@@ -160,4 +160,11 @@ describe('ESArray', () => {
 			index++;
 		}
 	});
+
+	test('toJson', () => {
+		expect(array.toJSON()).toEqual([1, 2, 3]);
+
+		array.length.set(5);
+		expect(array.toJSON()).toEqual([1, 2, 3, null, null]);
+	});
 });
