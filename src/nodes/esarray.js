@@ -9,31 +9,29 @@ import { ESNode } from './esnode.js';
 export class ESArray extends ESNode {
 	#length = new ESNaturalNumber(0);
 	/**
-	 * @param {ESNode<any>[]} [values]
+	 * @param {Iterable<ESNode<any>>} [values]
 	 */
-	constructor(values = []) {
-		super(values);
+	constructor(values) {
+		const array = [...values || []];
+		super(array);
 
-		this[NODE_VALUE] = values;
+		this[NODE_VALUE] = array;
 		/** @type {Set<ESNode<any>>} */
 		this[NODE_CHILDREN] = new Set();
 
-		this.#length.set(values.length);
+		this.#length.set(array.length);
 		this.#length.subscribe((value) => {
 			const array = this[NODE_VALUE];
 			if (array.length === value) return;
 			array.length = value;
 		});
-		append(this, this.#length, ...values);
+		append(this, this.#length, ...array);
 	}
 	/**
 	 * @param {number} index
 	 */
 	at(index) {
-		const array = this[NODE_VALUE];
-		const value = array.at(index);
-		super.set(array);
-		return value;
+		return this[NODE_VALUE].at(index);
 	}
 	get length() {
 		return this.#length;
