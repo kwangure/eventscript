@@ -10,7 +10,7 @@ import { ESNode } from './esnode.js';
 export class ESMap extends ESNode {
 	#size = new ESNaturalNumber(0);
 	/**
-	 * @param {Iterable<[K, ESNode<any>]>} [values]
+	 * @param {Iterable<[K, ESNode<T>]>} [values]
 	 */
 	constructor(values = []) {
 		const map = new Map(values);
@@ -75,4 +75,13 @@ export class ESMap extends ESNode {
 	values() {
 		return this[NODE_VALUE].values();
 	}
+}
+
+/**
+ * @template {string | number} K
+ * @template T
+ * @param {Record<K, ESNode<T>>} value
+ */
+export function create(value) {
+	return new ESMap(Object.entries(value));
 }

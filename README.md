@@ -11,11 +11,10 @@ npm install eventscript
 ```
 ### Usage
 ```js
-import {
-	ESArray, ESBoolean, ESMap, ESNumber, ESString,
-} from 'eventscript/nodes';
+import { es } from 'eventscript';
 
-const value = new ESString('rainbow');
+const value = es.string('rainbow');
+
 console.log(`${value} 🌈`);
 // rainbow 🌈
 ```
@@ -27,11 +26,12 @@ console.log(`${value} 🌈`);
 	<summary>🔝 Nested values bubble to parent observers</summary>
 
 ```js
-const one = new ESNumber(1);
-const two = new ESNumber(2);
-const three = new ESNumber(3);
-
-const numbers = new ESArray([one, two, three]);
+const numbers = es.array([
+	es.number(1),
+	es.number(2),
+	es.number(3),
+]);
+const one = numbers.at(0);
 const length = numbers.length;
 
 let numberCount = 0;
@@ -45,7 +45,7 @@ length.subscribe(() => console.log(`lengthCount === ${++lengthCount}`));
 one.set(100);
 // numberCount === 2
 
-numbers.push(new ESNumber(4));
+numbers.push(es.number(4));
 // lengthCount === 2
 // numberCount === 3
 
@@ -58,11 +58,11 @@ numbers.push(new ESNumber(4));
 This includes `ESString`, `ESNumber` and `ESBoolean`.
 
 ```js
-const fifteen = 5 + new ESNumber(10);
+const fifteen = 5 + es.number(10);
 console.log(`fifteen === 15 (${fifteen === 15})`);
 // fifteen === 15 (true)
 
-const catch22 = new ESString('catch') + new ESNumber(22);
+const catch22 = es.string('catch') + es.number(22);
 console.log(catch22, `(${typeof catch22})`);
 // catch22 (string)
 ```
@@ -73,7 +73,7 @@ console.log(catch22, `(${typeof catch22})`);
 
 Nodes that have iterable native counterparts are also iterable. For example, you can use the `for...of` construct to iterate `ESMap` or `ESString`.
 ```js
-const esString = new ESString('123');
+const esString = es.string('123');
 
 for (const char of esString) {
 	console.log(`${char} Mississippi`);
@@ -92,15 +92,11 @@ console.log(set);
 	<summary>💾 Values are serializable</summary>
 
 ```js
-const one = new ESNumber(1);
-const two = new ESNumber(2);
-const three = new ESNumber(3);
-
-const esMap = new ESMap([
-	['one', one],
-	['two', two],
-	['three', three],
-]);
+const esMap = es.map({
+	one: es.number(1),
+	two: es.number(2),
+	three: es.number(3),
+});
 
 console.log(JSON.stringify(esMap));
 // {"one":1,"two":2,"three":3}

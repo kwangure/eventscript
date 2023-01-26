@@ -39,3 +39,10 @@ export class ESBoolean extends ESNode {
 		return this[NODE_VALUE];
 	}
 }
+
+/**
+ * @param {any} value
+ */
+export function create(value) {
+	return new ESBoolean(value);
+}

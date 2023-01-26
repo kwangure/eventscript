@@ -4,19 +4,19 @@ import { ESNode } from './esnode.js';
 
 /**
  * @template T
- * @extends {ESNode<ESNode<T>[]>}
+ * @extends {ESNode<Iterable<ESNode<T>>>}
  */
 export class ESArray extends ESNode {
 	#length = new ESNaturalNumber(0);
 	/**
-	 * @param {Iterable<ESNode<any>>} [values]
+	 * @param {Iterable<ESNode<T>>} [values]
 	 */
 	constructor(values) {
 		const array = [...values || []];
 		super(array);
 
 		this[NODE_VALUE] = array;
-		/** @type {Set<ESNode<any>>} */
+		/** @type {Set<ESNode<T>>} */
 		this[NODE_CHILDREN] = new Set();
 
 		this.#length.set(array.length);
@@ -75,4 +75,12 @@ export class ESArray extends ESNode {
 	[Symbol.iterator]() {
 		return this[NODE_VALUE][Symbol.iterator]();
 	}
+}
+
+/**
+ * @template T
+ * @param {Iterable<ESNode<T>>} value
+ */
+export function create(value) {
+	return new ESArray(value);
 }

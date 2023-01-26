@@ -37,8 +37,17 @@ export class ESString extends ESNode {
 const STRING_METHODS = 'at charAt charCodeAt codePointAt includes endsWith indexOf lastIndexOf localeCompare match matchAll startsWith valueOf'.split(' ');
 
 STRING_METHODS.forEach((method) => {
+	// @ts-ignore
 	// eslint-disable-next-line func-names
 	ESString.prototype[method] = function (...args) {
+		// @ts-ignore
 		return String.prototype[method].call(this[NODE_VALUE], ...args);
 	};
 });
+
+/**
+ * @param {any} value
+ */
+export function create(value) {
+	return new ESString(value);
+}

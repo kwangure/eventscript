@@ -9,6 +9,7 @@ export class ESNode {
 	/** @type {Set<(arg: T) => any>} */
 	[NODE_SUBSCRIBERS] = new Set();
 
+	/** @param {T} */
 	constructor(value) {
 		this[NODE_VALUE] = value;
 	}
