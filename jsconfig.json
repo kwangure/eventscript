@@ -28,6 +28,8 @@
 		"./src/**/*.ts",
 		"./tests/**/*.js",
 		"./tests/**/*.ts",
+		"./scripts/**/*.js",
+		"./scripts/**/*.ts"
 	],
 	"exclude": [
 		"../node_modules/**",
