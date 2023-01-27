@@ -19,7 +19,7 @@ describe('index', () => {
 		expect(value[Symbol.toPrimitive]()).toBe(true);
 	});
 	it('creates maps', () => {
-		/** @type {Record<string, import('./nodes').ESNode<any>>} */
+		/** @type {Record<string, ESNumber | ESString | ESBoolean>}*/
 		const values = {
 			one: es.number(1),
 			two: es.string('2'),

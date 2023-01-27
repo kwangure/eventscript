@@ -9,7 +9,7 @@ describe('ESArray', () => {
 	 */
 	let values;
 	/**
-	 * @type {ESArray<number>}
+	 * @type {ESArray<ESNumber>}
 	 */
 	let array;
 

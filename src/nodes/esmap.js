@@ -4,13 +4,14 @@ import { ESNode } from './esnode.js';
 
 /**
  * @template {string | number} K
- * @template T
- * @extends {ESNode<Map<K, ESNode<T>>>}
+ * @template {ESNode<any>} T
+ * @extends {ESNode<Map<K, T extends ESNode<infer U> ? ESNode<U> : T>>}
+ *
  */
 export class ESMap extends ESNode {
 	#size = new ESNaturalNumber(0);
 	/**
-	 * @param {Iterable<[K, ESNode<T>]>} [values]
+	 * @param {Iterable<[K, T extends ESNode<infer U> ? ESNode<U> : T]>} [values]
 	 */
 	constructor(values = []) {
 		const map = new Map(values);
@@ -47,7 +48,7 @@ export class ESMap extends ESNode {
 	}
 	/**
 	 * @param {K} key
-	 * @param {ESNode<any>} value
+	 * @param {T extends ESNode<infer U> ? ESNode<U> : T} value
 	 */
 	set(key, value) {
 		this[NODE_VALUE].set(key, value);
@@ -59,7 +60,7 @@ export class ESMap extends ESNode {
 		return this.#size;
 	}
 	toJSON() {
-		/** @type {Record<string | number, import("type-fest").JsonValue>} */
+		/** @type {Record<string | number, import('type-fest').JsonValue>} */
 		const json = {};
 		for (const [key, value] of this[NODE_VALUE]) {
 			json[key] = value.toJSON();
@@ -78,9 +79,10 @@ export class ESMap extends ESNode {
 }
 
 /**
- * @template {string | number} K
- * @template T
- * @param {Record<K, ESNode<T>>} value
+ * @template {ESNode<any>} T
+ * @param {{
+ * 		[k: string | number]:  T extends ESNode<infer U> ? ESNode<U>: T
+ * }} value
  */
 export function create(value) {
 	return new ESMap(Object.entries(value));

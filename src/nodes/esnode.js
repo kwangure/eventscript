@@ -9,10 +9,12 @@ export class ESNode {
 	/** @type {Set<(arg: T) => any>} */
 	[NODE_SUBSCRIBERS] = new Set();
 
-	/** @param {T} */
+	/** @param {T} value */
 	constructor(value) {
 		this[NODE_VALUE] = value;
 	}
+
+	/** @param {...any} values */
 	// Use broad type to ease class subtyping
 	set(...values) {
 		this[NODE_VALUE] = values[0];
@@ -20,6 +22,7 @@ export class ESNode {
 	get parentNode() {
 		return this[NODE_PARENT];
 	}
+	/** @param {(arg: T) => any} fn */
 	subscribe(fn) {
 		this[NODE_SUBSCRIBERS].add(fn);
 		fn(this[NODE_VALUE]);

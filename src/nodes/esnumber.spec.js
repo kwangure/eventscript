@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ESNumber } from 'src/nodes/esnumber.js';
+import { ESNumber } from './esnumber.js';
 import { NODE_VALUE } from './esnode_constants.js';
 
 describe('ESNumber', () => {

@@ -3,13 +3,13 @@ import { NODE_CHILDREN, NODE_VALUE } from './esnode_constants.js';
 import { ESNode } from './esnode.js';
 
 /**
- * @template T
- * @extends {ESNode<Iterable<ESNode<T>>>}
+ * @template {ESNode<any>} T
+ * @extends {ESNode<(T extends ESNode<infer U> ? ESNode<U> : T)[]>}
  */
 export class ESArray extends ESNode {
 	#length = new ESNaturalNumber(0);
 	/**
-	 * @param {Iterable<ESNode<T>>} [values]
+	 * @param {Iterable<T extends ESNode<infer U> ? ESNode<U>: T>} [values]
 	 */
 	constructor(values) {
 		const array = [...values || []];
@@ -37,7 +37,7 @@ export class ESArray extends ESNode {
 		return this.#length;
 	}
 	/**
-	 * @param {ESNode<any>[]} values
+	 * @param {(T extends ESNode<infer U> ? ESNode<U> : T)[]} values
 	 */
 	push(...values) {
 		const array = this[NODE_VALUE];
@@ -47,7 +47,7 @@ export class ESArray extends ESNode {
 		this.#length.set(array.length);
 	}
 	/**
-	 * @returns {ESNode<any> | undefined}
+	 * @returns {(T extends ESNode<infer U> ? ESNode<U> : T) | undefined}
 	 */
 	pop() {
 		if (this[NODE_VALUE].length === 0) return;
@@ -78,8 +78,8 @@ export class ESArray extends ESNode {
 }
 
 /**
- * @template T
- * @param {Iterable<ESNode<T>>} value
+ * @template {ESNode<any>} T
+ * @param {Iterable<T extends ESNode<infer U> ? ESNode<U>: T>} value
  */
 export function create(value) {
 	return new ESArray(value);
