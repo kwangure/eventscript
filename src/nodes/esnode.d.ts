@@ -7,7 +7,7 @@ export abstract class ESNode<T> {
 	[NODE_SUBSCRIBERS]: Set<(arg: T) => any> = new Set();
 	[NODE_VALUE]: T;
 
-	constructor(value: T);
+	constructor();
 	// Use broad type to ease class subtyping
 	set(...values: any[]): any
 	get parentNode(): ESNode<any> | null;

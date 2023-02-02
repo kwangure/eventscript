@@ -14,18 +14,21 @@ export class ESMap extends ESNode {
 	 * @param {Iterable<[K, T extends ESNode<infer U> ? ESNode<U> : T]>} [values]
 	 */
 	constructor(values = []) {
+		super();
+
 		const map = new Map(values);
-		super(map);
 
 		/** @type {Set<ESNode<any>>} */
 		this[NODE_CHILDREN] = new Set();
 		this[NODE_VALUE] = map;
+
 		this.#size.set(map.size);
 		this.#size.subscribe((value) => {
-			if (this[NODE_VALUE].size === value) return;
+			if (map.size === value) return;
 			// TODO: Guard against changing size without calling subscribers
-			this.#size.set(this[NODE_VALUE].size);
+			this.#size.set(map.size);
 		});
+
 		append(this, this.#size, ...map.values());
 	}
 	/**

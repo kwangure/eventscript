@@ -10,9 +10,9 @@ export class ESBoolean extends ESNode {
 	 * @param {any} value
 	 */
 	constructor(value) {
-		const boolean = Boolean(value);
-		super(boolean);
-		this[NODE_VALUE] = boolean;
+		super();
+
+		this[NODE_VALUE] = Boolean(value);
 	}
 	/**
 	 * @param {any} value
@@ -20,7 +20,7 @@ export class ESBoolean extends ESNode {
 	set(value) {
 		const boolean = Boolean(value);
 		if (this[NODE_VALUE] === boolean) return;
-		super.set(boolean);
+		this[NODE_VALUE] = boolean;
 		bubbleChange(this);
 	}
 	false() {

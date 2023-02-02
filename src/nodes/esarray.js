@@ -12,8 +12,9 @@ export class ESArray extends ESNode {
 	 * @param {Iterable<T extends ESNode<infer U> ? ESNode<U>: T>} [values]
 	 */
 	constructor(values) {
+		super();
+
 		const array = [...values || []];
-		super(array);
 
 		this[NODE_VALUE] = array;
 		/** @type {Set<ESNode<T>>} */
@@ -21,10 +22,10 @@ export class ESArray extends ESNode {
 
 		this.#length.set(array.length);
 		this.#length.subscribe((value) => {
-			const array = this[NODE_VALUE];
 			if (array.length === value) return;
 			array.length = value;
 		});
+
 		append(this, this.#length, ...array);
 	}
 	/**

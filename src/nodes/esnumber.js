@@ -10,9 +10,9 @@ export class ESNumber extends ESNode {
 	 * @param {any} value
 	 */
 	constructor(value) {
-		const number = Number(value);
-		super(number);
-		this[NODE_VALUE] = number;
+		super();
+
+		this[NODE_VALUE] = Number(value);
 	}
 	/**
 	 * @param {any} value
@@ -20,7 +20,7 @@ export class ESNumber extends ESNode {
 	set(value) {
 		const number = Number(value);
 		if (this[NODE_VALUE] === number) return;
-		super.set(number);
+		this[NODE_VALUE] = number;
 		bubbleChange(this);
 	}
 	toJSON() {

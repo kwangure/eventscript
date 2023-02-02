@@ -12,11 +12,15 @@ import { NODE_VALUE } from './esnode_constants.js';
  * @extends {ESNode<T>}
  */
 class ESNewNode extends ESNode {
+	/** @param {T} value */
+	constructor(value) {
+		super();
+		this[NODE_VALUE] = value;
+	}
 	/**
 	 * @param {any} value
 	 */
 	set(value) {
-		super.set(value);
 		this[NODE_VALUE] = value;
 		callSubscribers(this);
 	}

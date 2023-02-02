@@ -10,9 +10,8 @@ export class ESString extends ESNode {
 	 * @param {any} value
 	 */
 	constructor(value) {
-		const string = String(value);
-		super(string);
-		this[NODE_VALUE] = string;
+		super();
+		this[NODE_VALUE] = String(value);
 	}
 	/**
 	 * @param {any} value
@@ -20,7 +19,7 @@ export class ESString extends ESNode {
 	set(value) {
 		const string = String(value);
 		if (this[NODE_VALUE] === string) return;
-		super.set(string);
+		this[NODE_VALUE] = string;
 		bubbleChange(this);
 	}
 	toJSON() {

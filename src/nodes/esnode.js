@@ -9,11 +9,6 @@ export class ESNode {
 	/** @type {Set<(arg: T) => any>} */
 	[NODE_SUBSCRIBERS] = new Set();
 
-	/** @param {T} value */
-	constructor(value) {
-		this[NODE_VALUE] = value;
-	}
-
 	/** @param {...any} values */
 	// Use broad type to ease class subtyping
 	set(...values) {
