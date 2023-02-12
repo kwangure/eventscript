@@ -92,7 +92,7 @@ describe('ESArray', () => {
 
 		it('calls array subscribers when set', () => {
 			let arrayLength = -1;
-			array.subscribe((n) => arrayLength = n.length);
+			array.subscribe((n) => arrayLength = Number(n.length));
 			array.length.set(10);
 
 			expect(arrayLength).toBe(10);
@@ -103,8 +103,7 @@ describe('ESArray', () => {
 		});
 
 		it('is not called when elements changed, but length did not', () => {
-			const first
-				= /** @type {import('./esnode').ESNode<any>} */(array.at(1));
+			const first = /** @type {ESNumber} */(array.at(1));
 
 			let arrayCallCount = 0;
 			array.subscribe(() => arrayCallCount++);

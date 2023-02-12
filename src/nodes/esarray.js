@@ -1,29 +1,37 @@
-import { append, ESNaturalNumber, isESNode, remove } from './esnodeutils.js';
-import { NODE_CHILDREN, NODE_VALUE } from './esnode_constants.js';
-import { ESNode } from './esnode.js';
+import { append, ESNaturalNumber, remove } from './esnodeutils.js';
+import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from './esnode_constants.js';
 
 /**
- * @template {ESNode<any>} T
- * @extends {ESNode<(T extends ESNode<infer U> ? ESNode<U> : T)[]>}
+ * @typedef {import('./esnode').ESNode} ESNode
  */
-export class ESArray extends ESNode {
+
+/**
+ * @template {ESNode} T
+ * @implements {ESNode}
+ */
+export class ESArray {
+	[NODE_CHILDREN] = new Set();
+
+	/** @type {ESNode | null} */
+	[NODE_PARENT] = null;
+
+	/** @type {Set<(arg: this) => any>} */
+	[NODE_SUBSCRIBERS] = new Set();
+
 	#length = new ESNaturalNumber(0);
+
 	/**
-	 * @param {Iterable<T extends ESNode<infer U> ? ESNode<U>: T>} [values]
+	 * @param {Iterable<T>} [values]
 	 */
 	constructor(values) {
-		super();
-
 		const array = [...values || []];
 
 		this[NODE_VALUE] = array;
-		/** @type {Set<ESNode<T>>} */
-		this[NODE_CHILDREN] = new Set();
 
 		this.#length.set(array.length);
 		this.#length.subscribe((value) => {
-			if (array.length === value) return;
-			array.length = value;
+			if (array.length === Number(value)) return;
+			array.length = Number(value);
 		});
 
 		append(this, this.#length, ...array);
@@ -38,7 +46,7 @@ export class ESArray extends ESNode {
 		return this.#length;
 	}
 	/**
-	 * @param {(T extends ESNode<infer U> ? ESNode<U> : T)[]} values
+	 * @param {T[]} values
 	 */
 	push(...values) {
 		const array = this[NODE_VALUE];
@@ -48,14 +56,14 @@ export class ESArray extends ESNode {
 		this.#length.set(array.length);
 	}
 	/**
-	 * @returns {(T extends ESNode<infer U> ? ESNode<U> : T) | undefined}
+	 * @returns {T | undefined}
 	 */
 	pop() {
 		if (this[NODE_VALUE].length === 0) return;
 
 		const value = this[NODE_VALUE].pop();
 		// `value` could be undefined if array was grown using `array.length`
-		if (isESNode(value)) {
+		if (value !== undefined) {
 			remove(this, value);
 		}
 		this.#length.set(this[NODE_VALUE].length);
@@ -76,11 +84,22 @@ export class ESArray extends ESNode {
 	[Symbol.iterator]() {
 		return this[NODE_VALUE][Symbol.iterator]();
 	}
+	get parentNode() {
+		return this[NODE_PARENT];
+	}
+	/** @param {(arg: this) => any} fn */
+	subscribe(fn) {
+		this[NODE_SUBSCRIBERS].add(fn);
+		fn(this);
+		return () => {
+			this[NODE_SUBSCRIBERS].delete(fn);
+		};
+	}
 }
 
 /**
- * @template {ESNode<any>} T
- * @param {Iterable<T extends ESNode<infer U> ? ESNode<U>: T>} value
+ * @template {ESNode} T
+ * @param {Iterable<T>} value
  */
 export function create(value) {
 	return new ESArray(value);

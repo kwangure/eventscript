@@ -1,16 +1,15 @@
-import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from "./esnode_constants";
+import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS } from './esnode_constants.js';
 import type { JsonValue } from "type-fest";
 
-export abstract class ESNode<T> {
-	[NODE_CHILDREN]: Set<ESNode<any>>;
-	[NODE_PARENT]: ESNode<any> | null = null;
-	[NODE_SUBSCRIBERS]: Set<(arg: T) => any> = new Set();
-	[NODE_VALUE]: T;
+export interface Subscriber<T extends ESNode> {
+	(arg: T): any
+}
 
-	constructor();
-	// Use broad type to ease class subtyping
-	set(...values: any[]): any
-	get parentNode(): ESNode<any> | null;
-	subscribe(fn: (arg: T) => any): () => boolean;
-	abstract toJSON(): JsonValue;
+export interface ESNode {
+	[NODE_CHILDREN]?: Set<ESNode>;
+	[NODE_PARENT]: ESNode | null;
+	[NODE_SUBSCRIBERS]: Set<Subscriber>;
+	get parentNode(): ESNode | null;
+	toJSON(): JsonValue;
+	subscribe(fn: Subscriber): () => void
 }

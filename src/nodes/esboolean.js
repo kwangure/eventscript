@@ -1,17 +1,24 @@
+import { NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from './esnode_constants.js';
 import { bubbleChange } from './esnodeutils.js';
-import { ESNode } from './esnode.js';
-import { NODE_VALUE } from './esnode_constants.js';
 
 /**
- * @extends {ESNode<boolean>}
+ * @typedef {import('./esnode').ESNode} ESNode
  */
-export class ESBoolean extends ESNode {
+
+/**
+ * @implements {ESNode}
+ */
+export class ESBoolean {
+	/** @type {ESNode | null} */
+	[NODE_PARENT] = null;
+
+	/** @type {Set<(arg: this) => any>} */
+	[NODE_SUBSCRIBERS] = new Set();
+
 	/**
 	 * @param {any} value
 	 */
 	constructor(value) {
-		super();
-
 		this[NODE_VALUE] = Boolean(value);
 	}
 	/**
@@ -37,6 +44,17 @@ export class ESBoolean extends ESNode {
 	}
 	[Symbol.toPrimitive]() {
 		return this[NODE_VALUE];
+	}
+	get parentNode() {
+		return this[NODE_PARENT];
+	}
+	/** @param {(arg: this) => any} fn */
+	subscribe(fn) {
+		this[NODE_SUBSCRIBERS].add(fn);
+		fn(this);
+		return () => {
+			this[NODE_SUBSCRIBERS].delete(fn);
+		};
 	}
 }
 

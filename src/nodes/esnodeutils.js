@@ -1,27 +1,30 @@
 import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from './esnode_constants.js';
-import { ESNode } from './esnode.js';
 
 /**
- * @param {ESNode<any>} instance
- * @param {ESNode<any>[]} nodes
+ * @typedef {import('./esnode').ESNode} ESNode
+ */
+
+/**
+ * @param {ESNode} instance
+ * @param {ESNode[]} nodes
  */
 export function append(instance, ...nodes) {
 	for (const node of nodes) {
 		node[NODE_PARENT] = instance;
-		instance[NODE_CHILDREN].add(node);
+		instance[NODE_CHILDREN]?.add(node);
 	}
 
 	return nodes;
 }
 
 /**
- * @param {ESNode<any>} instance
- * @param {ESNode<any>[]} nodes
+ * @param {ESNode} instance
+ * @param {ESNode[]} nodes
  */
 export function remove(instance, ...nodes) {
 	const deleted = [];
 	for (const node of nodes) {
-		if (instance[NODE_CHILDREN].delete(node)) {
+		if (instance[NODE_CHILDREN]?.delete(node)) {
 			node[NODE_PARENT] = null;
 			deleted.push(node);
 		}
@@ -30,19 +33,19 @@ export function remove(instance, ...nodes) {
 	return deleted;
 }
 /**
- * @param {ESNode<any>} node
+ * @param {ESNode} node
  */
 export function callSubscribers(node) {
 	for (const subscriber of node[NODE_SUBSCRIBERS]) {
-		subscriber(node[NODE_VALUE]);
+		subscriber(node);
 	}
 }
 
 /**
- * @param {ESNode<any>} node
+ * @param {ESNode} node
  */
 export function bubbleChange(node) {
-	/** @type {ESNode<any> | null} */
+	/** @type {ESNode | null} */
 	let current = node;
 	while (current !== null) {
 		callSubscribers(current);
@@ -51,18 +54,8 @@ export function bubbleChange(node) {
 }
 
 /**
- * @template T
- * @param {T} instance
- * @returns {instance is T & ESNode<any>}
- */
-export function isESNode(instance) {
-	return instance instanceof ESNode;
-}
-
-/**
- * @template {typeof ESNode<any>} T
  * @param {any} instance
- * @param {T} type
+ * @param {ESNode} type
  */
 export function isESNodeType(instance, type) {
 	try {
@@ -73,21 +66,23 @@ export function isESNodeType(instance, type) {
 }
 
 /**
-* @extends {ESNode<number>}
-*/
-export class ESNaturalNumber extends ESNode {
+ * @implements {ESNode}
+ */
+export class ESNaturalNumber {
+	/** @type {Set<import('./esnode').ESNode>} */
+	[NODE_CHILDREN] = new Set();
+
+	/** @type {ESNode | null} */
+	[NODE_PARENT] = null;
+
+	/** @type {Set<(arg: this) => any>} */
+	[NODE_SUBSCRIBERS] = new Set();
+
 	/**
 	 * @param {any} value
 	 */
 	constructor(value) {
-		super();
 		this[NODE_VALUE] = Number(value);
-	}
-	append() {
-		return [];
-	}
-	remove() {
-		return [];
 	}
 	/**
 	 * @param {any} value
@@ -103,5 +98,14 @@ export class ESNaturalNumber extends ESNode {
 	}
 	[Symbol.toPrimitive]() {
 		return this[NODE_VALUE];
+	}
+	get parentNode() {
+		return this[NODE_PARENT];
+	}
+	/** @param {(arg: this) => any} fn */
+	subscribe(fn) {
+		this[NODE_SUBSCRIBERS].add(fn);
+		fn(this);
+		return () => this[NODE_SUBSCRIBERS].delete(fn);
 	}
 }

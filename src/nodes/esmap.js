@@ -1,30 +1,37 @@
 import { append, ESNaturalNumber, remove } from './esnodeutils.js';
-import { NODE_CHILDREN, NODE_VALUE } from './esnode_constants.js';
-import { ESNode } from './esnode.js';
+import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from './esnode_constants.js';
+
+/**
+ * @typedef {import('./esnode').ESNode} ESNode
+ */
 
 /**
  * @template {string | number} K
- * @template {ESNode<any>} T
- * @extends {ESNode<Map<K, T extends ESNode<infer U> ? ESNode<U> : T>>}
- *
+ * @template {ESNode} T
+ * @implements {ESNode}}
  */
-export class ESMap extends ESNode {
+export class ESMap {
+	[NODE_CHILDREN] = new Set();
+
+	/** @type {ESNode | null} */
+	[NODE_PARENT] = null;
+
+	/** @type {Set<(arg: this) => any>} */
+	[NODE_SUBSCRIBERS] = new Set();
+
 	#size = new ESNaturalNumber(0);
 	/**
-	 * @param {Iterable<[K, T extends ESNode<infer U> ? ESNode<U> : T]>} [values]
+	 * @param {Iterable<[K, T]>} [values]
 	 */
 	constructor(values = []) {
-		super();
 
 		const map = new Map(values);
 
-		/** @type {Set<ESNode<any>>} */
-		this[NODE_CHILDREN] = new Set();
 		this[NODE_VALUE] = map;
 
 		this.#size.set(map.size);
 		this.#size.subscribe((value) => {
-			if (map.size === value) return;
+			if (map.size === Number(value)) return;
 			// TODO: Guard against changing size without calling subscribers
 			this.#size.set(map.size);
 		});
@@ -51,7 +58,7 @@ export class ESMap extends ESNode {
 	}
 	/**
 	 * @param {K} key
-	 * @param {T extends ESNode<infer U> ? ESNode<U> : T} value
+	 * @param {T} value
 	 */
 	set(key, value) {
 		this[NODE_VALUE].set(key, value);
@@ -79,12 +86,23 @@ export class ESMap extends ESNode {
 	values() {
 		return this[NODE_VALUE].values();
 	}
+	get parentNode() {
+		return this[NODE_PARENT];
+	}
+	/** @param {(arg: this) => any} fn */
+	subscribe(fn) {
+		this[NODE_SUBSCRIBERS].add(fn);
+		fn(this);
+		return () => {
+			this[NODE_SUBSCRIBERS].delete(fn);
+		};
+	}
 }
 
 /**
- * @template {ESNode<any>} T
+ * @template {ESNode} T
  * @param {{
- * 		[k: string | number]:  T extends ESNode<infer U> ? ESNode<U>: T
+ * 		[k: string | number]:  T
  * }} value
  */
 export function create(value) {

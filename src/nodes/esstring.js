@@ -1,16 +1,26 @@
+import { NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from './esnode_constants.js';
 import { bubbleChange } from './esnodeutils.js';
-import { ESNode } from './esnode.js';
-import { NODE_VALUE } from './esnode_constants.js';
 
 /**
- * @extends {ESNode<string>}
+ * @typedef {import('./esnode').ESNode} ESNode
  */
-export class ESString extends ESNode {
+
+/**
+ * @implements {ESNode}
+ */
+export class ESString {
+	/** @type {ESNode | null} */
+	[NODE_PARENT] = null;
+
+	/** @type {Set<(arg: this) => any>} */
+	[NODE_SUBSCRIBERS] = new Set();
+
+	[NODE_VALUE] = '';
+
 	/**
 	 * @param {any} value
 	 */
 	constructor(value) {
-		super();
 		this[NODE_VALUE] = String(value);
 	}
 	/**
@@ -30,6 +40,17 @@ export class ESString extends ESNode {
 	}
 	[Symbol.iterator]() {
 		return this[NODE_VALUE][Symbol.iterator]();
+	}
+	get parentNode() {
+		return this[NODE_PARENT];
+	}
+	/** @param {(arg: this) => any} fn */
+	subscribe(fn) {
+		this[NODE_SUBSCRIBERS].add(fn);
+		fn(this);
+		return () => {
+			this[NODE_SUBSCRIBERS].delete(fn);
+		};
 	}
 }
 
