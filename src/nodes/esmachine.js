@@ -1,16 +1,16 @@
 /**
+ * @typedef {import('./esstate.js').ESState} ESState
+ *
  * @typedef {{
  *     actions?: {
  *         [x: string]: (...args: any[]) => any,
  * 	   }
- *     states: {
- *         [x: string]: StateConfig,
- *     },
+ *     initial: ESState
  * }} Config
  *
  * @typedef {{
- *     actions: Map<string | PrivateAction, (...args: any) => any>
- *     states: Map<string, ValidatedStateConfig>;
+ *     actions: Map<string, (...args: any) => any>
+ *     initial: ESState
  * }} ValidatedConfig
  *
  * @typedef {{
@@ -38,24 +38,14 @@
  * }} Handler
  *
  * @typedef {{
- *     actions: (string | PrivateAction)[];
+ *     actions: (string)[];
 *     condition: string;
 *     transitionTo: string;
 * }} ValidatedHandler
  *
- * @typedef {typeof SET_STATE
- *     | typeof SET_TRANSITION
- *     | typeof UNSET_TRANSITION
- * } PrivateAction
  */
 
-import { append, bubbleChange } from './esnodeutils.js';
-import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from './esnode_constants.js';
-import { ESString } from './esstring.js';
-
-const SET_STATE = Symbol('set-state');
-const SET_TRANSITION = Symbol('set-transition');
-const UNSET_TRANSITION = Symbol('unset-transition');
+import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE, STATE_TRANSITION } from './esnode_constants.js';
 
 /**
  * @typedef {import('./esnode').ESNode} ESNode
@@ -74,132 +64,57 @@ export class ESMachine {
 	[NODE_SUBSCRIBERS] = new Set();
 
 	[NODE_VALUE] = '';
+
 	/** @type {ValidatedConfig} */
 	#config;
-	#state = new ESString('');
-	#stateValue = '';
-	/**
-	 * @type {{
-	 * 		to: string | null,
-	 *  	from: string | null,
-	 *  	active: boolean,
-	 * }}
-	 **/
-	#transition = {
-		to: null,
-		from: null,
-		active: false,
-	};
+
+	/** @type {ESState | null} */
+	#state = null;
 	/**
 	 * @param {Config} config
 	 */
 	constructor(config) {
 		this[NODE_VALUE] = this;
 		this.#config = validateConfig(config);
+		this.#state = this.#config.initial;
+		/**
+		 * @type {(() => void)}
+		 */
+		let unsubscribe;
+		const self = this;
+		/**
+		 * @param {ESState} state
+		 */
+		function subscribe(state) {
+			// eslint-disable-next-line no-extra-boolean-cast
+			if (Boolean(state.isActive)) return;
+			unsubscribe();
 
-		const firstState = this.#config.states.keys().next().value;
-		if (!firstState) {
-			throw Error('Include one or more states in the ESMachine config.');
+			const nextState = state[STATE_TRANSITION].to;
+			// This should never happen but typescript doesn't know that
+			if (!nextState) return;
+
+			self.#state = nextState;
+
+			unsubscribe = nextState.subscribe(subscribe);
 		}
-
-		this.#state.subscribe((value) => {
-			if (this.#stateValue === String(value)) return;
-			// TODO: Guard against changing state without calling subscribers
-			this.#state.set(this.#stateValue);
-		});
-		this.#executeHandlers([
-			toHandler({ transitionTo: firstState }),
-		]);
-
-		append(this, this.#state);
+		unsubscribe = this.#state.subscribe(subscribe);
 	}
 	/**
 	 * @param {string} event
 	 * @param {...any} value
 	 */
 	dispatch(event, ...value) {
-		const stateConfig = this.#stateConfig(this.#state.valueOf());
-		if (!stateConfig) return;
-		if (!Object.hasOwn(stateConfig.on, event)) return;
-		const handlers = [
-			...(stateConfig.on[event] ?? []),
-			...stateConfig.always,
-		];
-		this.#executeHandlers(handlers, ...value);
-	}
-	/**
-	 * @param {ValidatedHandler[]} handlers
-	 * @param {...any} args
-	 */
-	#executeHandlers(handlers, ...args) {
-		while (handlers.length) {
-			const handler = /** @type {Handler} */(handlers.shift());
-			const { actions, transitionTo } = handler;
-			if (transitionTo) {
-				this.#config.actions.set(SET_STATE, () => {
-					this.#setState(transitionTo);
-				});
-				this.#config.actions.set(SET_TRANSITION, () => {
-					this.#transition.to = transitionTo;
-					this.#transition.from = this.#state.valueOf();
-					this.#transition.active = true;
-				});
-				this.#config.actions.set(UNSET_TRANSITION, () => {
-					this.#transition.active = false;
-				});
-				handlers = [
-					...this.#getHandlers('exit', this.#state.valueOf()),
-					toHandler({ actions }),
-					toHandler({ actions: [SET_STATE]}),
-					...this.#getHandlers('entry', transitionTo),
-					...this.#getHandlers('always', transitionTo),
-					toHandler({ actions: [UNSET_TRANSITION]}),
-				];
-				continue;
-			}
-			for (const actionName of actions) {
-				const action = this.#config.actions.get(actionName);
-				if (!action) {
-					throw Error(`Attempted run to unknown action '${String(actionName)}'`);
-				}
-				action.call(this, ...args);
-			}
-		}
-		bubbleChange(this);
-	}
-	/**
-	 * @param {'always' | 'entry' | 'exit'} type
-	 * @param {any} state
-	 */
-	#getHandlers(type, state) {
-		const stateConfig = this.#stateConfig(state);
-		if (!stateConfig) return [];
-		return stateConfig[type];
-	}
-	/**
-	 * @param {string} state
-	 */
-	#setState(state) {
-		this.#stateValue = state;
-		this.#state.set(state);
+		this.#state?.dispatch(event, ...value);
 	}
 	get state() {
 		return this.#state;
 	}
-	/**
-	 * @param {string} state
-	 */
-	#stateConfig(state) {
-		return this.#config.states.get(state);
-	}
 	toJSON() {
-		return structuredClone({
-			state: this.#state.valueOf(),
-			transition: this.#transition,
-		});
+		return '';
 	}
 	get transition() {
-		return structuredClone(this.#transition);
+		return this.#state?.transition;
 	}
 	get parentNode() {
 		return this[NODE_PARENT];
@@ -226,43 +141,13 @@ export function create(config) {
  * @returns {ValidatedConfig}
  */
 function validateConfig(config) {
-	const states = config.states ? Object.entries(config.states) : [];
-	/** @type {Map<string, ValidatedStateConfig>} */
-	const validatedStateConfigs = new Map();
-	for (const [stateName, stateConfig] of states) {
-		const always = (stateConfig.always || []).map(toHandler);
-		const entry = (stateConfig.entry || []).map((handler) => toHandler({
-			...handler,
-			transitionTo: '',
-		}));
-		const exit = (stateConfig.exit || []).map((handler) => toHandler({
-			...handler,
-			transitionTo: '',
-		}));
-		/** @type {Record<string, ValidatedHandler[]>} */
-		const on = {};
-		const eventHandlers = Object.entries(stateConfig.on || {});
-		for (const [event, handlers] of eventHandlers) {
-			on[event] = handlers.map(toHandler);
-		}
-		validatedStateConfigs.set(stateName, { always, entry, exit, on });
-	}
-
 	const actions = config.actions
 		? new Map(Object.entries(config.actions))
 		: new Map();
 
 	return {
 		actions,
-		states: validatedStateConfigs,
+		initial: config.initial,
 	};
 }
 
-/**
- * @param {Partial<ValidatedHandler>} options
- * @returns {ValidatedHandler}
- */
-function toHandler(options) {
-	const { actions = [], condition = '', transitionTo = '' } = options;
-	return { actions, condition, transitionTo };
-}
