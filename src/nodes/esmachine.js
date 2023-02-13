@@ -62,7 +62,6 @@ const UNSET_TRANSITION = Symbol('unset-transition');
  */
 
 /**
- * @template {ESNode} T
  * @implements {ESNode}
  */
 export class ESMachine {
@@ -79,8 +78,6 @@ export class ESMachine {
 	#config;
 	#state = new ESString('');
 	#stateValue = '';
-	/** @type {T} */
-	#value;
 	/**
 	 * @type {{
 	 * 		to: string | null,
@@ -94,11 +91,9 @@ export class ESMachine {
 		active: false,
 	};
 	/**
-	 * @param {T} node
 	 * @param {Config} config
 	 */
-	constructor(node, config) {
-		this.#value = node;
+	constructor(config) {
 		this[NODE_VALUE] = this;
 		this.#config = validateConfig(config);
 
@@ -116,7 +111,7 @@ export class ESMachine {
 			toHandler({ transitionTo: firstState }),
 		]);
 
-		append(this, this.#state, node);
+		append(this, this.#state);
 	}
 	/**
 	 * @param {string} event
@@ -220,12 +215,10 @@ export class ESMachine {
 }
 
 /**
- * @template {ESNode} T
- * @param {T} node
  * @param {Config} config
  */
-export function create(node, config) {
-	return new ESMachine(node, config);
+export function create(config) {
+	return new ESMachine(config);
 }
 
 /**

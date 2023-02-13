@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { es } from '../index.js';
 import { ESMachine } from './esmachine.js';
 
 describe('machine', () => {
@@ -7,10 +6,6 @@ describe('machine', () => {
 	 * @type {import('./esmachine.js').Config}
 	 */
 	let config;
-	/**
-	 * @type {import("./esmap.js").ESMap<string, import("./esstring.js").ESString | import("./esboolean.js").ESBoolean>}
-	 */
-	let value;
 	beforeEach(() => {
 		config = {
 			states: {
@@ -30,18 +25,14 @@ describe('machine', () => {
 				},
 			},
 		};
-		value = es.map({
-			string: es.string(''),
-			value: es.boolean(false),
-		});
 	});
 
 	it('requires states', () => {
-		expect(() => new ESMachine(value, { states: {}})).toThrow('Include one or more states');
+		expect(() => new ESMachine({ states: {}})).toThrow('Include one or more states');
 	});
 
 	it('sets initial state', () => {
-		expect(new ESMachine(value, config).state.valueOf()).toBe('readable');
+		expect(new ESMachine(config).state.valueOf()).toBe('readable');
 	});
 
 	it('executes initial state entry actions', () => {
@@ -58,12 +49,12 @@ describe('machine', () => {
 			},
 		};
 		let entryExecuted = '';
-		new ESMachine(value, config);
+		new ESMachine(config);
 		expect(entryExecuted).toBe(message + message);
 	});
 
 	it('transitions on dispatch', () => {
-		const machine = new ESMachine(value, config);
+		const machine = new ESMachine(config);
 		machine.dispatch('EDIT');
 		expect(machine.state.valueOf()).toBe('editable');
 		machine.dispatch('SAVE');
