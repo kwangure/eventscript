@@ -206,4 +206,357 @@ describe('machine', () => {
 			expect(actions).toEqual(['exit2', 'transition2', 'entry1', 'always1']);
 		});
 	});
+
+	describe('transitions', () => {
+		/** @type {ESState} */
+		let machine;
+		/** @type {string[]} */
+		let transitions;
+		beforeEach(() => {
+			transitions = [];
+			machine = new ESState('machine');
+			machine.configure({
+				actions: {
+					always1() {
+						transitions.push({
+							...JSON.parse(JSON.stringify(this.transition)),
+							action: 'always1',
+						});
+					},
+					entry1() {
+						transitions.push({
+							...JSON.parse(JSON.stringify(this.transition)),
+							action: 'entry1',
+						});
+					},
+					exit1() {
+						transitions.push({
+							...JSON.parse(JSON.stringify(this.transition)),
+							action: 'exit1',
+						});
+					},
+					transition1() {
+						transitions.push({
+							...JSON.parse(JSON.stringify(this.transition)),
+							action: 'transition1',
+						});
+					},
+					always2() {
+						transitions.push({
+							...JSON.parse(JSON.stringify(this.transition)),
+							action: 'always2',
+						});
+					},
+					entry2() {
+						transitions.push({
+							...JSON.parse(JSON.stringify(this.transition)),
+							action: 'entry2',
+						});
+					},
+					exit2() {
+						transitions.push({
+							...JSON.parse(JSON.stringify(this.transition)),
+							action: 'exit2',
+						});
+					},
+					transition2() {
+						transitions.push({
+							...JSON.parse(JSON.stringify(this.transition)),
+							action: 'transition2',
+						});
+					},
+				},
+				states: {
+					first: {
+						always: [{
+							actions: ['always1'],
+						}],
+						entry: [{
+							actions: ['entry1'],
+						}],
+						exit: [{
+							actions: ['exit1'],
+						}],
+						on: {
+							event: [{
+								transitionTo: 'second',
+								actions: ['transition1'],
+							}],
+						},
+					},
+					second: {
+						always: [{
+							actions: ['always2'],
+						}],
+						entry: [{
+							actions: ['entry2'],
+						}],
+						exit: [{
+							actions: ['exit2'],
+						}],
+						on: {
+							event: [{
+								transitionTo: 'first',
+								actions: ['transition2'],
+							}],
+						},
+					},
+				},
+			});
+		});
+
+		it('runs initial entry then transient actions', () => {
+			expect(transitions).toEqual([
+				{
+					action: 'entry1',
+					active: true,
+					from: null,
+					to: {
+						name: 'first',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+				},
+				{
+					action: 'always1',
+					active: true,
+					from: null,
+					to: {
+						name: 'first',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+				},
+			]);
+			expect(machine.toJSON().transition).toEqual({
+				active: false,
+				from: undefined,
+				to: {
+					name: 'first',
+					states: {},
+					transition: {
+						active: false,
+						from: undefined,
+						to: undefined,
+					},
+				},
+			});
+		});
+
+		it('runs exit, transition, entry then transient actions', () => {
+			expect(machine.toJSON().transition).toEqual({
+				active: false,
+				from: undefined,
+				to: {
+					name: 'first',
+					states: {},
+					transition: {
+						active: false,
+						from: undefined,
+						to: undefined,
+					},
+				},
+			});
+
+			transitions = [];
+			machine.dispatch('event');
+			expect(transitions).toEqual([
+				{
+					action: 'exit1',
+					active: true,
+					from: {
+						name: 'first',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+					to: {
+						name: 'second',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+				},
+				{
+					action: 'transition1',
+					active: true,
+					from: {
+						name: 'first',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+					to: {
+						name: 'second',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+				},
+				{
+					action: 'entry2',
+					active: true,
+					from: {
+						name: 'first',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+					to: {
+						name: 'second',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+				},
+				{
+					action: 'always2',
+					active: true,
+					from: {
+						name: 'first',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+					to: {
+						name: 'second',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+				},
+			]);
+			expect(machine.toJSON().transition).toEqual({
+				active: false,
+				from: {
+					name: 'first',
+					states: {},
+					transition: {
+						active: false,
+						from: undefined,
+						to: undefined,
+					},
+				},
+				to: {
+					name: 'second',
+					states: {},
+					transition: {
+						active: false,
+						from: undefined,
+						to: undefined,
+					},
+				},
+			});
+
+			transitions = [];
+			machine.dispatch('event');
+			expect(transitions).toEqual([
+				{
+					action: 'exit2',
+					active: true,
+					from: {
+						name: 'second',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+					to: {
+						name: 'first',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+				},
+				{
+					action: 'transition2',
+					active: true,
+					from: {
+						name: 'second',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+					to: {
+						name: 'first',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+				},
+				{
+					action: 'entry1',
+					active: true,
+					from: {
+						name: 'second',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+					to: {
+						name: 'first',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+				},
+				{
+					action: 'always1',
+					active: true,
+					from: {
+						name: 'second',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+					to: {
+						name: 'first',
+						states: {},
+						transition: {
+							active: false,
+						},
+					},
+				},
+			]);
+			expect(machine.toJSON().transition).toEqual({
+				active: false,
+				from: {
+					name: 'second',
+					states: {},
+					transition: {
+						active: false,
+						from: undefined,
+						to: undefined,
+					},
+				},
+				to: {
+					name: 'first',
+					states: {},
+					transition: {
+						active: false,
+						from: undefined,
+						to: undefined,
+					},
+				},
+			});
+		});
+	});
 });

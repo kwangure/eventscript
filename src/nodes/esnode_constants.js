@@ -4,4 +4,3 @@ export const NODE_SUBSCRIBERS = Symbol('subscribers');
 export const NODE_VALUE = Symbol('value');
 
 export const STATE_SIBLINGS = Symbol('state-siblings');
-export const STATE_TRANSITION = Symbol('state-transition');

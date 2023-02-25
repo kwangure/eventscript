@@ -3,13 +3,13 @@ import type { ESState } from "./esstate";
 
 export type StateConfig = {
 	actions?: {
-		[x: string]: (...args: any[]) => any,
+		[x: string]: (this: ESState, ...args: any[]) => any,
 	}
-	always?: Partial<StateHandler>[],
-	entry?: Partial<Omit<StateHandler, 'transitionTo'>>[],
-	exit?: Partial<Omit<StateHandler, 'transitionTo'>>[],
+	always?: AlwaysHandlerConfig[],
+	entry?: EntryHandlerConfig[],
+	exit?: ExitHandlerConfig[],
 	on?: {
-		[x: string]: Partial<StateHandler>[];
+		[x: string]: DispatchHandlerConfig[];
 	};
 	states?: {
 		[x: string]: StateConfig;
@@ -18,31 +18,41 @@ export type StateConfig = {
 }
 
 export type ResolvedStateConfig = {
-	actions: Map<string, (...args: any) => any>
-	always: ResolvedStateHandler[],
-	entry: ResolvedStateHandler[],
-	exit: ResolvedStateHandler[],
-	on: {
-		[x: string]: ResolvedStateHandler[];
-	};
 	states: Map<string, ESState>
 }
 
-export type StateHandler = {
-	actions: string[];
-	condition: string;
-	transitionTo: string;
-}
-
-export type ResolvedStateHandler = {
-	actions: ((...args: any[]) => any)[];
+export type AlwaysHandlerConfig = {
+	actions?: string[];
 	condition?: string;
-	transitionTo?: ESState;
+	transitionTo?: string;
 }
 
-export type StateTransition = {
-	active: boolean;
-	from: ESState | null;
-	to: ESState | null;
+export type DispatchHandlerConfig = {
+	actions?: string[];
+	condition?: string;
+	transitionTo?: string;
 }
+
+export type EntryHandlerConfig = {
+	actions?: string[];
+	condition?: string;
+}
+
+export type ExitHandlerConfig = {
+	actions?: string[];
+	condition?: string;
+}
+
+export type ESStateJson = {
+	name: string,
+	states: {
+		[x: string]: ESStateJson,
+	},
+	transition: {
+		active: boolean;
+		from: ESStateJson | undefined,
+		to: ESStateJson | undefined,
+	}
+};
+
 
