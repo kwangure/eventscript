@@ -1,89 +1,35 @@
 /**
- * @typedef {{
- *     actions?: {
- *         [x: string]: (...args: any[]) => any,
- * 	   }
- *     always?: Partial<Handler>[],
- *     entry?: Partial<Omit<Handler, 'transitionTo'>>[],
- *     exit?: Partial<Omit<Handler, 'transitionTo'>>[],
- *     on?: {
- *         [x: string]: Partial<Handler>[];
- *     };
- * }} StateConfig
- *
- * @typedef {{
- *     actions: Map<string | PrivateAction, (...args: any) => any>
- *     always: ValidatedHandler[],
- *     entry: ValidatedHandler[],
- *     exit: ValidatedHandler[],
- *     on: {
- *         [x: string]: ValidatedHandler[];
- *     };
- * }} ValidatedStateConfig
- *
- * @typedef {{
- *     actions: string[];
- *     condition: string;
- *     transitionTo: ESState;
- * }} Handler
- *
- * @typedef {{
- *     actions: (string | PrivateAction)[];
- *     condition: string;
- *     transitionTo: ESState | null;
- * }} ValidatedHandler
- *
- * @typedef {typeof SET_STATE
- *     | typeof SET_TRANSITION
- *     | typeof UNSET_TRANSITION
- * } PrivateAction
- */
-
-import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, STATE_TRANSITION } from './esnode_constants.js';
-import { bubbleChange } from './esnodeutils.js';
-import { ESBoolean } from './esboolean.js';
-
-const STATE_ACTIVE = Symbol('state-active');
-const SET_STATE = Symbol('set-state');
-const SET_TRANSITION = Symbol('set-transition');
-const UNSET_TRANSITION = Symbol('unset-transition');
-
-/**
+ * @typedef {import('./types').StateConfig} StateConfig
+ * @typedef {import('./types').ResolvedStateConfig} ResolvedStateConfig
+ * @typedef {import('./types').StateHandler} Handler
+ * @typedef {import('./types').ResolvedStateHandler} ResolvedStateHandler
+ * @typedef {import('./types').StateTransition} StateTransition
  * @typedef {import('./esnode').ESNode} ESNode
- * @typedef {{
- * 		to: ESState | null,
- *  	from: ESState | null,
- *  	active: boolean,
- * }} Transition
  */
 
-/**
- * @implements {ESNode}
- */
+import { STATE_SIBLINGS, STATE_TRANSITION } from './esnode_constants.js';
+
 export class ESState {
-	[NODE_CHILDREN] = new Set();
-
-	/** @type {ESNode | null} */
-	[NODE_PARENT] = null;
-
-	/** @type {Set<(arg: this) => any>} */
-	[NODE_SUBSCRIBERS] = new Set();
-
-	[STATE_ACTIVE] = false;
-
-	/** @type {Transition} */
+	/** @type {StateTransition} */
 	[STATE_TRANSITION] = { active: false, from: null, to: null };
+	/** @type {ResolvedStateConfig} */
+	#config = {
+		actions: new Map(),
+		always: [],
+		entry: [],
+		exit: [],
+		on: {},
+		states: new Map(),
+	};
+	#configured = false;
+	/** @type {ESState | null} */
+	#state = null;
+	/** @type {Set<(arg: this) => any>} */
+	#subscribers = new Set();
 
-	/** @type {ValidatedStateConfig} */
-	#config;
-
-	#isActive = new ESBoolean(false);
-
-	/**
-	 * @param {StateConfig} config
-	 */
-	constructor(config) {
-		this.#config = validateConfig(config);
+	/** @param {string} name */
+	constructor(name) {
+		this.name = name;
 	}
 	get config() {
 		return this.#config;
@@ -93,119 +39,226 @@ export class ESState {
 	 * @param {...any} value
 	 */
 	dispatch(event, ...value) {
-		if (!Object.hasOwn(this.#config, event)) return;
+		if (
+			!this.#state?.config
+			|| !Object.hasOwn(this.#state.config.on, event)
+		) return;
 		const handlers = [
-			...(this.#config.on[event] ?? []),
-			...this.#config.always,
+			...this.#state.config.on[event],
+			...this.#state.config.always,
 		];
 		this.#executeHandlers(handlers, ...value);
 	}
 	/**
-	 * @param {ValidatedHandler[]} handlers
+	 * @param {ResolvedStateHandler[]} handlers
 	 * @param {...any} args
 	 */
 	#executeHandlers(handlers, ...args) {
 		while (handlers.length) {
-			const handler = /** @type {Handler} */(handlers.shift());
+			const handler
+				= /** @type {ResolvedStateHandler} */(handlers.shift());
 			const { actions, transitionTo } = handler;
-			this.#config.actions.set(SET_STATE, () => {
-				this.#isActive.true();
-				if (this[STATE_TRANSITION].from) {
-					this[STATE_TRANSITION].from.isActive.false();
-				}
-			});
-			this.#config.actions.set(SET_TRANSITION, () => {
-				transitionTo[STATE_TRANSITION].from = this;
-				this[STATE_TRANSITION].to = transitionTo;
-				this[STATE_TRANSITION].active = true;
-			});
-			this.#config.actions.set(UNSET_TRANSITION, () => {
-				this[STATE_TRANSITION].active = false;
-			});
 			if (transitionTo) {
-				handlers = [
-					...this.#config.exit,
-					toHandler({ actions }),
-					toHandler({ actions: [SET_STATE]}),
-					...transitionTo.config.entry,
-					...transitionTo.config.always,
-					toHandler({ actions: [UNSET_TRANSITION]}),
-				];
+				handlers = [];
+				// mark transition as active
+				handlers.push({
+					actions: [() => {
+						this[STATE_TRANSITION] = {
+							from: this.#state,
+							to: transitionTo,
+							active: true,
+						};
+					}],
+				});
+				// exit actions for the current state
+				if (this.#state?.config.exit) {
+					handlers.push(...this.#state.config.exit);
+				}
+				// transition actions for the current state
+				handlers.push({ actions: handler.actions });
+				// change the active nested state for this state
+				handlers.push({
+					actions: [() => this.#state = transitionTo],
+				});
+				// entry actions for the next state
+				if (transitionTo.config.entry) {
+					handlers.push(...transitionTo.config.entry);
+				}
+				// transient actions for the next state
+				if (transitionTo.config.always) {
+					handlers.push(...transitionTo.config.always);
+				}
+				// mark transition as completed
+				handlers.push({
+					actions: [() => {
+						this[STATE_TRANSITION].active = false;
+					}],
+				});
+
 				continue;
 			}
-			for (const actionName of actions) {
-				const action = this.#config.actions.get(actionName);
-				if (!action) {
-					throw Error(`Attempted run to unknown action '${String(actionName)}'`);
-				}
-				action.call(this, ...args);
-			}
+			this.#runActions(actions, args);
 		}
-		bubbleChange(this);
+
+		this.#callSubscribers();
 	}
-	get isActive() {
-		return this.#isActive;
+	#callSubscribers() {
+		for (const subscriber of this.#subscribers) {
+			subscriber(this);
+		}
+	}
+	/**
+	 * @param {((...args: any) => any)[]} actions
+	 * @param {any[]} args
+	 */
+	#runActions(actions, args) {
+		for (const action of actions) {
+			action.call(this, ...args);
+		}
 	}
 	toJSON() {
 		return {
-			isActive: this.#isActive.toJSON(),
+			name: this.name,
 		};
 	}
 	get transition() {
 		return this[STATE_TRANSITION];
 	}
-	get parentNode() {
-		return this[NODE_PARENT];
-	}
 	/** @param {(arg: this) => any} fn */
 	subscribe(fn) {
-		this[NODE_SUBSCRIBERS].add(fn);
+		this.#subscribers.add(fn);
 		fn(this);
 		return () => {
-			this[NODE_SUBSCRIBERS].delete(fn);
+			this.#subscribers.delete(fn);
 		};
 	}
-}
+	/** @param {StateConfig} stateConfig */
+	configure(stateConfig) {
+		if (this.#configured) throw Error('State already configured');
+		this.#configured = true;
 
-/**
- * @param {StateConfig} config
- */
-export function create(config) {
-	return new ESState(config);
-}
+		const actions = stateConfig.actions || {};
+		if (stateConfig.states) {
+			for (const name in stateConfig.states) {
+				if (Object.hasOwn(stateConfig.states, name)) {
+					const state = new ESState(name);
+					this.#config.states.set(name, state);
+				}
+			}
+			for (const [name, state] of this.#config.states) {
+				const config = stateConfig.states[name];
+				state.configure({
+					...config,
+					actions: {
+						...actions,
+						...config.actions,
+					},
+					[STATE_SIBLINGS]: this.#config.states,
+				});
+			}
+		}
 
-/**
- * @param {StateConfig} stateConfig
- * @returns {ValidatedStateConfig}
- */
-function validateConfig(stateConfig) {
-	const always = (stateConfig.always || []).map(toHandler);
-	const entry = (stateConfig.entry || []).map((handler) => toHandler({
-		...handler,
-		transitionTo: undefined,
-	}));
-	const exit = (stateConfig.exit || []).map((handler) => toHandler({
-		...handler,
-		transitionTo: undefined,
-	}));
-		/** @type {Record<string, ValidatedHandler[]>} */
-	const on = {};
-	const eventHandlers = Object.entries(stateConfig.on || {});
-	for (const [event, handlers] of eventHandlers) {
-		on[event] = handlers.map(toHandler);
+		/** @type {(handler: Partial<Handler>) => ResolvedStateHandler} */
+		const validateHandler = (handler) => (
+			resolveHandler({
+				actions,
+				states: stateConfig[STATE_SIBLINGS] || new Map(),
+			}, handler)
+		);
+		const always = stateConfig.always || [];
+		for (const handler of always) {
+			const validatedStateHandler = validateHandler(handler);
+			this.#config.always.push(validatedStateHandler);
+		}
+
+		const entry = stateConfig.entry || [];
+		for (const handler of entry) {
+			const validatedStateHandler = validateHandler({
+				...handler,
+				transitionTo: undefined,
+			});
+			this.#config.entry.push(validatedStateHandler);
+		}
+
+		const exit = stateConfig.exit || [];
+		for (const handler of exit) {
+			const validatedStateHandler = validateHandler({
+				...handler,
+				transitionTo: undefined,
+			});
+			this.#config.exit.push(validatedStateHandler);
+		}
+
+		const eventHandlers = Object.entries(stateConfig.on || {});
+		for (const [event, handlers] of eventHandlers) {
+			this.#config.on[event] = handlers.map(validateHandler);
+		}
+
+		const iteratorResult = this.#config.states.values().next();
+		// Has at least one nested state
+		if (!iteratorResult.done) {
+			this.#initialize(iteratorResult.value);
+		}
 	}
-	const actions = stateConfig.actions
-		? new Map(Object.entries(stateConfig.actions))
-		: new Map();
 
-	return { actions, always, entry, exit, on };
+	/** @param {ESState} initialState*/
+	#initialize(initialState) {
+		this[STATE_TRANSITION].to = initialState;
+		this[STATE_TRANSITION].active = true;
+		this.#state = initialState;
+
+		const handlers = [
+			...initialState.config.entry,
+			...initialState.config.always,
+		];
+
+		for (const { actions } of handlers) {
+			for (const action of actions) {
+				action.call(this);
+			}
+		}
+
+		this[STATE_TRANSITION].active = false;
+	}
+	get state() {
+		return this.#state;
+	}
 }
 
 /**
- * @param {Partial<ValidatedHandler>} options
- * @returns {ValidatedHandler}
+ * @param {string} name
  */
-function toHandler(options) {
-	const { actions = [], condition = '', transitionTo = null } = options;
+export function create(name) {
+	return new ESState(name);
+}
+
+/**
+ * @param {{
+ *     actions: NonNullable<StateConfig['actions']>;
+ *     states: Map<string, ESState>;
+ * }} config
+ * @param {Partial<Handler>} handler
+ * @returns {ResolvedStateHandler}
+ */
+function resolveHandler(config, handler) {
+	const { condition = '' } = handler;
+
+	const actions = [];
+	for (const name of handler.actions || []) {
+		const action = config.actions[name];
+		if (!action) {
+			throw Error(`State references unknown action '${name}'.`);
+		}
+		actions.push(action);
+	}
+
+	let transitionTo;
+	if (handler.transitionTo) {
+		transitionTo = config.states.get(handler.transitionTo);
+		if (!transitionTo) {
+			throw Error(`Unknown sibling state '${handler.transitionTo}'.`);
+		}
+	}
+
 	return { actions, condition, transitionTo };
 }
