@@ -643,4 +643,28 @@ describe('machine', () => {
 			expect(actions).toEqual(['exit', 'exit', 'transition']);
 		});
 	});
+
+	it('always runs transient actions', () => {
+		const machine = new ESState('machine');
+		/** @type {number} */
+		let alwaysCount = 0;
+		machine.configure({
+			actions: {
+				always() {
+					alwaysCount++;
+				},
+			},
+			states: {
+				current: {
+					always: [{
+						actions: ['always'],
+					}],
+				},
+			},
+		});
+		expect(alwaysCount).toBe(1);
+
+		machine.dispatch('non-existent');
+		expect(alwaysCount).toBe(2);
+	});
 });

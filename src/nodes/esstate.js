@@ -217,12 +217,13 @@ export class ESState {
 	 * @param {...any} value
 	 */
 	dispatch(event, ...value) {
-		if (!this.#state || !Object.hasOwn(this.#state.on, event)) return;
-		// bug: run always handler even when event is missing
-		this.#executeHandlers([
-			...this.#state.on[event],
-			...this.#state.always,
-		], ...value);
+		if (!this.#state) return;
+		const handlers = [];
+		if (Object.hasOwn(this.#state.on, event)) {
+			handlers.push(...this.#state.on[event]);
+		}
+		handlers.push(...this.#state.always);
+		this.#executeHandlers(handlers, ...value);
 		this.#callSubscribers();
 	}
 	get entry() {
