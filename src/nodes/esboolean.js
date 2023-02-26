@@ -21,6 +21,12 @@ export class ESBoolean {
 	constructor(value) {
 		this[NODE_VALUE] = Boolean(value);
 	}
+	false() {
+		this.set(false);
+	}
+	get parentNode() {
+		return this[NODE_PARENT];
+	}
 	/**
 	 * @param {any} value
 	 */
@@ -30,24 +36,6 @@ export class ESBoolean {
 		this[NODE_VALUE] = boolean;
 		bubbleChange(this);
 	}
-	false() {
-		this.set(false);
-	}
-	toggle() {
-		this.set(!this[NODE_VALUE]);
-	}
-	true() {
-		this.set(true);
-	}
-	toJSON() {
-		return this[NODE_VALUE];
-	}
-	[Symbol.toPrimitive]() {
-		return this[NODE_VALUE];
-	}
-	get parentNode() {
-		return this[NODE_PARENT];
-	}
 	/** @param {(arg: this) => any} fn */
 	subscribe(fn) {
 		this[NODE_SUBSCRIBERS].add(fn);
@@ -55,6 +43,18 @@ export class ESBoolean {
 		return () => {
 			this[NODE_SUBSCRIBERS].delete(fn);
 		};
+	}
+	toggle() {
+		this.set(!this[NODE_VALUE]);
+	}
+	toJSON() {
+		return this[NODE_VALUE];
+	}
+	true() {
+		this.set(true);
+	}
+	[Symbol.toPrimitive]() {
+		return this[NODE_VALUE];
 	}
 }
 

@@ -23,6 +23,7 @@
     "devDependencies": {
         "@kwangure/eslint-config-svelte": "^0.2.5",
         "eslint": "^8.32.0",
+        "eslint-plugin-sort-class-members": "^1.16.0",
         "eslint-plugin-svelte3": "^4.0.0",
         "husky": "^8.0.3",
         "release-it": "^15.6.0",

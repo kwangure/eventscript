@@ -11,20 +11,16 @@ import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from './esno
  * @implements {ESNode}}
  */
 export class ESMap {
+	#size = new ESNaturalNumber(0);
 	[NODE_CHILDREN] = new Set();
-
 	/** @type {ESNode | null} */
 	[NODE_PARENT] = null;
-
 	/** @type {Set<(arg: this) => any>} */
 	[NODE_SUBSCRIBERS] = new Set();
-
-	#size = new ESNaturalNumber(0);
 	/**
 	 * @param {Iterable<[K, T]>} [values]
 	 */
 	constructor(values = []) {
-
 		const map = new Map(values);
 
 		this[NODE_VALUE] = map;
@@ -56,6 +52,12 @@ export class ESMap {
 	get(key) {
 		return this[NODE_VALUE].get(key);
 	}
+	keys() {
+		return this[NODE_VALUE].keys();
+	}
+	get parentNode() {
+		return this[NODE_PARENT];
+	}
 	/**
 	 * @param {K} key
 	 * @param {T} value
@@ -69,6 +71,14 @@ export class ESMap {
 	get size() {
 		return this.#size;
 	}
+	/** @param {(arg: this) => any} fn */
+	subscribe(fn) {
+		this[NODE_SUBSCRIBERS].add(fn);
+		fn(this);
+		return () => {
+			this[NODE_SUBSCRIBERS].delete(fn);
+		};
+	}
 	toJSON() {
 		/** @type {Record<string | number, import('type-fest').JsonValue>} */
 		const json = {};
@@ -77,25 +87,11 @@ export class ESMap {
 		}
 		return json;
 	}
-	[Symbol.iterator]() {
-		return this[NODE_VALUE][Symbol.iterator]();
-	}
-	keys() {
-		return this[NODE_VALUE].keys();
-	}
 	values() {
 		return this[NODE_VALUE].values();
 	}
-	get parentNode() {
-		return this[NODE_PARENT];
-	}
-	/** @param {(arg: this) => any} fn */
-	subscribe(fn) {
-		this[NODE_SUBSCRIBERS].add(fn);
-		fn(this);
-		return () => {
-			this[NODE_SUBSCRIBERS].delete(fn);
-		};
+	[Symbol.iterator]() {
+		return this[NODE_VALUE][Symbol.iterator]();
 	}
 }
 

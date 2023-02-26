@@ -23,6 +23,9 @@ export class ESString {
 	constructor(value) {
 		this[NODE_VALUE] = String(value);
 	}
+	get parentNode() {
+		return this[NODE_PARENT];
+	}
 	/**
 	 * @param {any} value
 	 */
@@ -32,18 +35,6 @@ export class ESString {
 		this[NODE_VALUE] = string;
 		bubbleChange(this);
 	}
-	toJSON() {
-		return this[NODE_VALUE];
-	}
-	[Symbol.toPrimitive]() {
-		return this[NODE_VALUE];
-	}
-	[Symbol.iterator]() {
-		return this[NODE_VALUE][Symbol.iterator]();
-	}
-	get parentNode() {
-		return this[NODE_PARENT];
-	}
 	/** @param {(arg: this) => any} fn */
 	subscribe(fn) {
 		this[NODE_SUBSCRIBERS].add(fn);
@@ -51,6 +42,15 @@ export class ESString {
 		return () => {
 			this[NODE_SUBSCRIBERS].delete(fn);
 		};
+	}
+	toJSON() {
+		return this[NODE_VALUE];
+	}
+	[Symbol.iterator]() {
+		return this[NODE_VALUE][Symbol.iterator]();
+	}
+	[Symbol.toPrimitive]() {
+		return this[NODE_VALUE];
 	}
 }
 

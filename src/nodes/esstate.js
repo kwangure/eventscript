@@ -47,16 +47,11 @@ import { STATE_SIBLINGS } from './esnode_constants.js';
 export class ESState {
 	/** @type {AlwaysHandler[]} */
 	#always = [];
+	#configured = false;
 	/** @type {EntryHandler[]} */
 	#entry = [];
 	/** @type {ExitHandler[]} */
 	#exit = [];
-	#transitionActive = false;
-	/** @type {ESState | null} */
-	#transitionFrom = null;
-	/** @type {ESState | null} */
-	#transitionTo = null;
-	#configured = false;
 	/** @type {Record<string, DispatchHandler[]>} */
 	#on = {};
 	/** @type {ESState | null} */
@@ -65,6 +60,11 @@ export class ESState {
 	#states = new Map();
 	/** @type {Set<(arg: this) => any>} */
 	#subscribers = new Set();
+	#transitionActive = false;
+	/** @type {ESState | null} */
+	#transitionFrom = null;
+	/** @type {ESState | null} */
+	#transitionTo = null;
 
 	/** @param {string} name */
 	constructor(name) {
@@ -135,6 +135,7 @@ export class ESState {
 
 		this.#transitionActive = false;
 	}
+
 	/**
 	 * @param {((...args: any) => any)[]} actions
 	 * @param {any[]} args
@@ -144,7 +145,9 @@ export class ESState {
 			action.call(this, ...args);
 		}
 	}
-
+	get always() {
+		return this.#always;
+	}
 	/** @param {StateConfig} stateConfig */
 	configure(stateConfig) {
 		if (this.#configured) throw Error('State already configured');
@@ -230,6 +233,18 @@ export class ESState {
 		], ...value);
 		this.#callSubscribers();
 	}
+	get entry() {
+		return this.#entry;
+	}
+	get exit() {
+		return this.#exit;
+	}
+	get on() {
+		return this.#on;
+	}
+	get state() {
+		return this.#state;
+	}
 	/** @param {(arg: this) => any} fn */
 	subscribe(fn) {
 		fn(this);
@@ -256,22 +271,6 @@ export class ESState {
 				to: this.#transitionTo?.toJSON(),
 			},
 		};
-	}
-
-	get always() {
-		return this.#always;
-	}
-	get entry() {
-		return this.#entry;
-	}
-	get exit() {
-		return this.#exit;
-	}
-	get on() {
-		return this.#on;
-	}
-	get state() {
-		return this.#state;
 	}
 	get transition() {
 		return {

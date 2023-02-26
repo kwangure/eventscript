@@ -3,6 +3,7 @@
 .wireit
 build
 package
+dist
 
 # Asset folders
 static

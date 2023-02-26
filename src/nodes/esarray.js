@@ -10,16 +10,12 @@ import { NODE_CHILDREN, NODE_PARENT, NODE_SUBSCRIBERS, NODE_VALUE } from './esno
  * @implements {ESNode}
  */
 export class ESArray {
+	#length = new ESNaturalNumber(0);
 	[NODE_CHILDREN] = new Set();
-
 	/** @type {ESNode | null} */
 	[NODE_PARENT] = null;
-
 	/** @type {Set<(arg: this) => any>} */
 	[NODE_SUBSCRIBERS] = new Set();
-
-	#length = new ESNaturalNumber(0);
-
 	/**
 	 * @param {Iterable<T>} [values]
 	 */
@@ -45,15 +41,8 @@ export class ESArray {
 	get length() {
 		return this.#length;
 	}
-	/**
-	 * @param {T[]} values
-	 */
-	push(...values) {
-		const array = this[NODE_VALUE];
-		array.push(...values);
-
-		append(this, ...values);
-		this.#length.set(array.length);
+	get parentNode() {
+		return this[NODE_PARENT];
 	}
 	/**
 	 * @returns {T | undefined}
@@ -69,6 +58,24 @@ export class ESArray {
 		this.#length.set(this[NODE_VALUE].length);
 		return value;
 	}
+	/**
+	 * @param {T[]} values
+	 */
+	push(...values) {
+		const array = this[NODE_VALUE];
+		array.push(...values);
+
+		append(this, ...values);
+		this.#length.set(array.length);
+	}
+	/** @param {(arg: this) => any} fn */
+	subscribe(fn) {
+		this[NODE_SUBSCRIBERS].add(fn);
+		fn(this);
+		return () => {
+			this[NODE_SUBSCRIBERS].delete(fn);
+		};
+	}
 	toJSON() {
 		// JSON.stringify serializes empty slots and undefined in Array to null
 		const array = this[NODE_VALUE];
@@ -83,17 +90,6 @@ export class ESArray {
 	}
 	[Symbol.iterator]() {
 		return this[NODE_VALUE][Symbol.iterator]();
-	}
-	get parentNode() {
-		return this[NODE_PARENT];
-	}
-	/** @param {(arg: this) => any} fn */
-	subscribe(fn) {
-		this[NODE_SUBSCRIBERS].add(fn);
-		fn(this);
-		return () => {
-			this[NODE_SUBSCRIBERS].delete(fn);
-		};
 	}
 }
 
