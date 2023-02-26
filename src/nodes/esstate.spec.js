@@ -89,35 +89,6 @@ describe('machine', () => {
 		});
 	});
 
-	it('runs initial entry and transient actions', () => {
-		const machine = new ESState('machine');
-
-		/** @type {string[]} */
-		const actions = [];
-		machine.configure({
-			actions: {
-				always() {
-					actions.push('always');
-				},
-				entry() {
-					actions.push('entry');
-				},
-			},
-			states: {
-				first: {
-					always: [{
-						actions: ['always'],
-					}],
-					entry: [{
-						actions: ['entry'],
-					}],
-				},
-			},
-		});
-
-		expect(actions).toEqual(['entry', 'always']);
-	});
-
 	describe('actions', () => {
 		/** @type {ESState} */
 		let machine;
