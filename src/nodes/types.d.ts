@@ -6,6 +6,9 @@ export type StateConfig = {
 		[x: string]: (this: ESState, ...args: any[]) => any,
 	}
 	always?: AlwaysHandlerConfig[],
+	conditions?: {
+		[x: string]: (this: ESState, ...args: any[]) => boolean,
+	}
 	entry?: EntryHandlerConfig[],
 	exit?: ExitHandlerConfig[],
 	on?: {

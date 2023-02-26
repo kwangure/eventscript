@@ -530,4 +530,117 @@ describe('machine', () => {
 			});
 		});
 	});
+
+	describe('conditions', () => {
+		/** @type {ESState} */
+		let machine;
+		/** @type {string[]} */
+		let actions;
+		beforeEach(() => {
+			actions = [];
+			machine = new ESState('machine');
+			machine.configure({
+				actions: {
+					ignore() {
+						actions.push('ignore');
+					},
+					always() {
+						actions.push('always');
+					},
+					entry() {
+						actions.push('entry');
+					},
+					exit() {
+						actions.push('exit');
+					},
+					transition() {
+						actions.push('transition');
+					},
+				},
+				conditions: {
+					run() {
+						return true;
+					},
+					ignore() {
+						return false;
+					},
+				},
+				states: {
+					current: {
+						always: [
+							{
+								actions: ['always'],
+								condition: 'run',
+							},
+							{
+								actions: ['always'],
+							},
+							{
+								actions: ['ignore'],
+								condition: 'ignore',
+							},
+						],
+						entry: [
+							{
+								actions: ['entry'],
+								condition: 'run',
+							},
+							{
+								actions: ['entry'],
+							},
+							{
+								actions: ['ignore'],
+								condition: 'ignore',
+							},
+						],
+						exit: [
+							{
+								actions: ['exit'],
+								condition: 'run',
+							},
+							{
+								actions: ['exit'],
+							},
+							{
+								actions: ['ignore'],
+								condition: 'ignore',
+							},
+						],
+						on: {
+							ignored: [
+								{
+									transitionTo: 'other',
+									condition: 'ignore',
+									actions: ['transition'],
+								},
+							],
+							transition: [
+								{
+									transitionTo: 'other',
+									actions: ['transition'],
+								},
+							],
+						},
+					},
+					other: {},
+				},
+			});
+		});
+
+		it('ignores initial entry then transient actions', () => {
+			expect(actions).toEqual(['entry', 'entry', 'always', 'always']);
+		});
+
+		it('ignores exit, transition, entry and transient actions', () => {
+			actions = [];
+			machine.dispatch('ignored');
+			expect(machine.state?.name).toEqual('current');
+			expect(actions).toEqual(['always', 'always']);
+
+			actions = [];
+			machine.dispatch('transition');
+			expect(machine.state?.name).toEqual('other');
+			expect(actions).toEqual(['exit', 'exit', 'transition']);
+		});
+	});
 });

@@ -16,35 +16,35 @@ import { STATE_SIBLINGS } from './esnode_constants.js';
  * @typedef {{
  *     type: 'always';
  *     actions: ((...args: any[]) => any)[];
- *     condition: string;
+ *     condition: (...args: any[]) => boolean;
  *     transitionTo: ESState | null;
  * }} AlwaysHandler
  *
  * @typedef {{
  *     type: 'dispatch';
  *     actions: ((...args: any[]) => any)[];
- *     condition: string;
+ *     condition: (...args: any[]) => boolean;
  *     transitionTo: ESState | null;
  * }} DispatchHandler
  *
  * @typedef {{
  *     type: 'entry';
  *     actions: ((...args: any[]) => any)[];
- *     condition: string;
+ *     condition: (...args: any[]) => boolean;
  *     transitionTo: null;
  * }} EntryHandler
  *
  * @typedef {{
  *     type: 'exit';
  *     actions: ((...args: any[]) => any)[];
- *     condition: string;
+ *     condition: (...args: any[]) => boolean;
  *     transitionTo: null;
  * }} ExitHandler
  *
  * @typedef {{
  *     type: 'init';
  *     actions: [];
- *     condition: string;
+ *     condition: (...args: any[]) => boolean;
  *     transitionTo: ESState;
  * }} InitHandler
  *
@@ -88,7 +88,10 @@ export class ESState {
 	 * @param {...any} args
 	 */
 	#executeHandlers(handlers, ...args) {
-		for (const { actions, transitionTo } of handlers) {
+		for (const { actions, condition, transitionTo } of handlers) {
+			if (!condition.call(this, ...args)) {
+				continue;
+			}
 			if (transitionTo) {
 				this.#transitionFrom = this.#state;
 				this.#transitionTo = transitionTo;
@@ -132,6 +135,7 @@ export class ESState {
 		this.#configured = true;
 
 		const actions = stateConfig.actions || {};
+		const conditions = stateConfig.conditions || {};
 		if (stateConfig.states) {
 			for (const name in stateConfig.states) {
 				if (Object.hasOwn(stateConfig.states, name)) {
@@ -147,6 +151,10 @@ export class ESState {
 						...actions,
 						...config.actions,
 					},
+					conditions: {
+						...conditions,
+						...config.conditions,
+					},
 					[STATE_SIBLINGS]: this.#states,
 				});
 			}
@@ -157,7 +165,7 @@ export class ESState {
 		for (const handler of always) {
 			this.#always.push({
 				actions: resolveActions(actions, handler),
-				condition: '',
+				condition: resolveCondition(conditions, handler),
 				transitionTo: resolveTransition(states, handler),
 				type: 'always',
 			});
@@ -167,7 +175,7 @@ export class ESState {
 		for (const handler of entry) {
 			this.#entry.push({
 				actions: resolveActions(actions, handler),
-				condition: '',
+				condition: resolveCondition(conditions, handler),
 				transitionTo: null,
 				type: 'entry',
 			});
@@ -177,7 +185,7 @@ export class ESState {
 		for (const handler of exit) {
 			this.#exit.push({
 				actions: resolveActions(actions, handler),
-				condition: '',
+				condition: resolveCondition(conditions, handler),
 				transitionTo: null,
 				type: 'exit',
 			});
@@ -187,7 +195,7 @@ export class ESState {
 		for (const [event, handlers] of eventHandlers) {
 			this.#on[event] = handlers.map((handler) => ({
 				actions: resolveActions(actions, handler),
-				condition: '',
+				condition: resolveCondition(conditions, handler),
 				transitionTo: resolveTransition(states, handler),
 				type: 'dispatch',
 			}));
@@ -198,7 +206,7 @@ export class ESState {
 		if (!iteratorResult.done) {
 			this.#executeHandlers([{
 				actions: [],
-				condition: '',
+				condition: () => true,
 				transitionTo: iteratorResult.value,
 				type: 'init',
 			}]);
@@ -286,6 +294,21 @@ function resolveActions(config, handler) {
 		actions.push(action);
 	}
 	return actions;
+}
+
+/**
+ * @param {NonNullable<StateConfig['conditions']>} config
+ * @param {Partial<HandlerConfig>} handler
+ */
+function resolveCondition(config, handler) {
+	if (handler.condition === undefined) {
+		return () => true;
+	}
+	const condition = config[handler.condition];
+	if (!condition) {
+		throw Error(`State references unknown condition '${handler.condition}'.`);
+	}
+	return condition;
 }
 
 /**
