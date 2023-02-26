@@ -41,7 +41,14 @@ import { STATE_SIBLINGS } from './esnode_constants.js';
  *     transitionTo: null;
  * }} ExitHandler
  *
- * @typedef {AlwaysHandler | DispatchHandler | EntryHandler | ExitHandler} Handler
+ * @typedef {{
+ *     type: 'init';
+ *     actions: [];
+ *     condition: string;
+ *     transitionTo: ESState;
+ * }} InitHandler
+ *
+ * @typedef {AlwaysHandler | DispatchHandler | EntryHandler | ExitHandler | InitHandler} Handler
  */
 
 export class ESState {
@@ -81,14 +88,8 @@ export class ESState {
 	 * @param {...any} args
 	 */
 	#executeHandlers(handlers, ...args) {
-		while (handlers.length) {
-			const handler = handlers.shift();
-			// This is not possible but TypeScript doesn't know that.
-			if (!handler) break;
-			const { actions, transitionTo } = handler;
+		for (const { actions, transitionTo } of handlers) {
 			if (transitionTo) {
-				handlers = [];
-
 				this.#transitionFrom = this.#state;
 				this.#transitionTo = transitionTo;
 				this.#transitionActive = true;
@@ -102,40 +103,17 @@ export class ESState {
 				// change the active nested state for this state
 				this.#state = transitionTo;
 				// entry actions for the next state
-				if (transitionTo.entry) {
-					this.#executeHandlers(transitionTo.entry, ...args);
-				}
+				this.#executeHandlers(transitionTo.entry, ...args);
 				// transient actions for the next state
-				if (transitionTo.always) {
-					this.#executeHandlers(transitionTo.always, ...args);
-				}
+				this.#executeHandlers(transitionTo.always, ...args);
 				// mark transition as completed
 				this.#transitionActive = false;
-			} else if (actions) {
-				this.#runActions(actions, args);
+				break;
 			}
+
+			this.#runActions(actions, args);
 		}
 	}
-	/** @param {ESState} initialState*/
-	#initialize(initialState) {
-		this.#transitionTo = initialState;
-		this.#transitionActive = true;
-		this.#state = initialState;
-
-		const handlers = [
-			...initialState.entry,
-			...initialState.always,
-		];
-
-		for (const { actions } of handlers) {
-			for (const action of actions) {
-				action.call(this);
-			}
-		}
-
-		this.#transitionActive = false;
-	}
-
 	/**
 	 * @param {((...args: any) => any)[]} actions
 	 * @param {any[]} args
@@ -218,7 +196,12 @@ export class ESState {
 		const iteratorResult = this.#states.values().next();
 		// Has at least one nested state
 		if (!iteratorResult.done) {
-			this.#initialize(iteratorResult.value);
+			this.#executeHandlers([{
+				actions: [],
+				condition: '',
+				transitionTo: iteratorResult.value,
+				type: 'init',
+			}]);
 		}
 	}
 	/**
@@ -227,6 +210,7 @@ export class ESState {
 	 */
 	dispatch(event, ...value) {
 		if (!this.#state || !Object.hasOwn(this.#state.on, event)) return;
+		// bug: run always handler even when event is missing
 		this.#executeHandlers([
 			...this.#state.on[event],
 			...this.#state.always,
