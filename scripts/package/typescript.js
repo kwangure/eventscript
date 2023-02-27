@@ -46,6 +46,7 @@ export async function emitFiles(config) {
 				console.log(ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"));
 			}
 		});
+		process.exit(1);
 	}
 	return files;
 }
